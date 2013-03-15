@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<TestSettings name="TestSettings" id="05d9b747-d55f-4166-a070-3c877a64b6ff" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Description>These are default test settings for a local test run.</Description>
+  <Deployment>
+    <DeploymentItem filename="Core\Configuration\Log4Net.config" />
+    <DeploymentItem filename="packages\log4net.2.0.0\lib\net40-full\log4net.dll" />
+    <DeploymentItem filename="packages\Common.Logging.Log4Net1211.2.1.2\lib\net40\Common.Logging.Log4Net1211.dll" />
+    <DeploymentItem filename="Core\Configuration\ConnectionStrings.config" />
+    <DeploymentItem filename="Core\Configuration\Common.Logging.config" />
+  </Deployment>
+  <NamingScheme baseName="MSTEST" />
+  <Execution>
+    <TestTypeSpecific>
+      <UnitTestRunConfig testTypeId="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b">
+        <AssemblyResolution>
+          <TestDirectory useLoadContext="true" />
+        </AssemblyResolution>
+      </UnitTestRunConfig>
+    </TestTypeSpecific>
+    <AgentRule name="LocalMachineDefaultRole">
+    </AgentRule>
+  </Execution>
+</TestSettings>
