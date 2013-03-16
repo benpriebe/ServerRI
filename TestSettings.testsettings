@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<TestSettings name="TestSettings" id="05d9b747-d55f-4166-a070-3c877a64b6ff" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+<TestSettings name="TestSettings" id="f3fbc634-a193-40fb-85a9-45437bca3307" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
   <Description>These are default test settings for a local test run.</Description>
   <Deployment>
     <DeploymentItem filename="Core\Configuration\Log4Net.config" />
@@ -8,7 +8,6 @@
     <DeploymentItem filename="Core\Configuration\ConnectionStrings.config" />
     <DeploymentItem filename="Core\Configuration\Common.Logging.config" />
   </Deployment>
-  <NamingScheme baseName="MSTEST" />
   <Execution>
     <TestTypeSpecific>
       <UnitTestRunConfig testTypeId="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b">

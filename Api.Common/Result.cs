@@ -1,5 +1,6 @@
 ﻿#region Using directives
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -21,7 +22,7 @@ namespace Api.Common
 
         public string ToMessageText(string delimiter = "\n")
         {
-            return string.Join(delimiter, Messages.Select(m => string.Format("{0}({1}): {2}", m.Level, m.Code, m.Phrase)).ToArray());
+            return string.Join(delimiter, Messages.Select(m => string.Format("{0}({1}): {2}", m.Level, m.Code, String.Format(m.Phrase, m.Tokens)).ToArray()));
         }
 
         public static Result CreateEmpty()
@@ -40,9 +41,9 @@ namespace Api.Common
             });
         }
 
-        public static Result Create(params Message[] message)
+        public static Result Create(params Message[] messages)
         {
-            return Create(message.ToList());
+            return Create(messages.ToList());
         }
 
         public static Result Create(IEnumerable<Message> messages)
@@ -70,7 +71,7 @@ namespace Api.Common
 
         public string ToMessageText(string delimiter = "\n")
         {
-            return string.Join(delimiter, Messages.Select(m => string.Format("{0}({1}): {2}", m.Level, m.Code, m.Phrase)).ToArray());
+            return string.Join(delimiter, Messages.Select(m => string.Format("{0}({1}): {2}", m.Level, m.Code, String.Format(m.Phrase, m.Tokens)).ToArray()));
         }
 
         public static Result<T> CreateEmpty()
@@ -109,9 +110,9 @@ namespace Api.Common
             };
         }
 
-        public static Result<T> Create(params Message[] messages)
+        public static Result<T> Create(params Message[] messagees)
         {
-            return Create(messages.ToList());
+            return Create(messagees.ToList());
         }
     }
 }

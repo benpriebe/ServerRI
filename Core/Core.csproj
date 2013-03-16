@@ -59,6 +59,7 @@
     </Compile>
     <Compile Include="IoCModules\IoCLoggingModule.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
+    <Compile Include="Extensions\LoggingExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

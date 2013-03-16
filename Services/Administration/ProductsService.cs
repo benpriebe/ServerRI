@@ -17,10 +17,6 @@ using Providers;
 
 namespace Services.Administration
 {
-    /// <summary>
-    /// todo: figure exception handling
-    /// todo: figure out logging.
-    /// </summary>
     public class ProductsService : BaseService
     {
         private readonly ILog _log;
@@ -32,7 +28,7 @@ namespace Services.Administration
 
         public Result AddProduct(ProductModelRequest product)
         {
-            _log.Info(m => m.Invoke("{0}:{1} - Entered with product {2}", GetType().Name, MethodBase.GetCurrentMethod().Name, product.ToJson()));
+            _log.Enter(GetType(), MethodBase.GetCurrentMethod(), String.Format("with product {0}", product.ToJson()));
 
             var utcNow = DateTime.UtcNow;
             var entity = Mapper.Map<Product>(product);
@@ -45,38 +41,53 @@ namespace Services.Administration
                 {
                     uow.Products.Add(entity);
                     uow.Commit();
+                    _log.Info(GetType(), MethodBase.GetCurrentMethod(), String.Format(" product added - id = {0}", entity.ProductID));
                 }
             }
             catch (ProviderException e)
             {
-                _log.Error(m => m.Invoke("{0}:{1} - ProviderException {2}", GetType().Name, MethodBase.GetCurrentMethod().Name, e.Errors.ToJson()), e);
-                //TODO: 15-Mar-2013 - Ben - when implementing the web.api make sure all messagelevel.errors get turned into HttpStatusCode.500
-                return Result.Create(new Message(MessageLevel.Error, 500, "RESX.Key", e.Errors.ToJson()));
+
+                try
+                {
+                    _log.Exception(GetType(), MethodBase.GetCurrentMethod(), e, e.Errors.ToJson());
+                }
+                catch (Exception exception)
+                {
+                    Console.WriteLine(exception);
+                }
+                return ResultExtensions.Create(e, 666);
+                //todo: 15-Mar-2013 - Ben - when implementing the web.api make sure all messagelevel.errors get turned into HttpStatusCode.500
             }
 
             product.Id = entity.ProductID;
+
+            _log.Exit(GetType(), MethodBase.GetCurrentMethod(), String.Format("with product {0}", product.ToJson()));
             return Result.CreateEmpty();
         }
 
+
         public Result DeleteProduct(int productId)
         {
-            _log.Info(m => m.Invoke("{0}:{1} - Entered with productId - {2}", GetType().Name, MethodBase.GetCurrentMethod().Name, productId));
+            _log.Enter(GetType(), MethodBase.GetCurrentMethod(), String.Format("with productId {0}", productId));
 
             using (var uow = UoW())
             {
                 uow.Products.Delete(productId);
                 uow.Commit();
+
+                _log.Exit(GetType(), MethodBase.GetCurrentMethod(), String.Format("with productId {0}", productId));
                 return Result.CreateEmpty();
             }
         }
 
         public Result<ProductModelResponse> GetProductById(int productId)
         {
-            _log.Info(m => m.Invoke("{0}:{1} - Entered with productId - {2}", GetType().Name, MethodBase.GetCurrentMethod().Name, productId));
+            _log.Enter(GetType(), MethodBase.GetCurrentMethod(), String.Format("with productId {0}", productId));
 
             using (var uow = UoW())
             {
                 var entity = uow.Products.GetById(productId);
+                _log.Exit(GetType(), MethodBase.GetCurrentMethod(), String.Format("with productId {0}", productId));
                 return entity == null
                     ? Result<ProductModelResponse>.Create(ServiceMessages.ProductNotFound) //TODO: 15-Mar-2013 - Ben - turn this into a 404 on the web api layer.
                     : Result<ProductModelResponse>.Create(Mapper.Map<ProductModelResponse>(entity));
@@ -85,22 +96,24 @@ namespace Services.Administration
 
         public Result<IList<ProductModel>> GetProducts()
         {
-            _log.Info(m => m.Invoke("{0}:{1} - Entered", GetType().Name, MethodBase.GetCurrentMethod().Name));
+            _log.Enter(GetType(), MethodBase.GetCurrentMethod());
 
             using (var uow = UoW())
             {
                 IList<Product> entities = uow.Products.GetAll().ToList();
+                _log.Exit(GetType(), MethodBase.GetCurrentMethod());
                 return Result<IList<ProductModel>>.Create(Mapper.Map<IList<ProductModel>>(entities));
             }
         }
 
         public Result<IList<ProductModelResponse>> GetProductsWithDetails()
         {
-            _log.Info(m => m.Invoke("{0}:{1} - Entered", GetType().Name, MethodBase.GetCurrentMethod().Name));
+            _log.Enter(GetType(), MethodBase.GetCurrentMethod());
 
             using (var uow = UoW())
             {
                 IList<Product> entities = uow.Products.GetProductsWithDetails().ToList();
+                _log.Exit(GetType(), MethodBase.GetCurrentMethod());
                 return Result<IList<ProductModelResponse>>.Create(Mapper.Map<IList<ProductModelResponse>>(entities));
             }
         }

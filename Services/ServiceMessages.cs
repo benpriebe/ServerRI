@@ -9,6 +9,6 @@ namespace Services
 {
     public static class ServiceMessages
     {
-        public static readonly Message ProductNotFound = new Message(MessageLevel.Error, 101, "Product Not Found", string.Empty);
+        public static readonly Message ProductNotFound = new Message(MessageLevel.Error, 101, "Product Not Found");
     }
 }

@@ -52,6 +52,9 @@
     <Reference Include="log4net">
       <HintPath>..\packages\log4net.2.0.0\lib\net40-full\log4net.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Entity" />
@@ -78,6 +81,10 @@
     <ProjectReference Include="..\Contracts\Contracts.csproj">
       <Project>{027A3FAE-A424-40D6-B778-3F2DECFD02E7}</Project>
       <Name>Contracts</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Core\Core.csproj">
+      <Project>{0BD00D6C-EC41-48C9-9C39-BB86E087456A}</Project>
+      <Name>Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\Data\Data.csproj">
       <Project>{F46FEA12-BC24-4F84-809D-86F687FC7FCD}</Project>

@@ -65,6 +65,7 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="ResultExtensions.cs" />
     <Compile Include="AutoMapperConfig.cs" />
     <Compile Include="BaseService.cs" />
     <Compile Include="Administration\ProductsService.cs" />
