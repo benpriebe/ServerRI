@@ -2,10 +2,10 @@
 
 using System;
 using System.Net.Http;
-using System.Transactions;
 using System.Web.Http;
 using Api.Web.Extensions;
 using Common.Logging;
+using Core;
 using Models.Administration.Products;
 using Services.Administration;
 
@@ -14,19 +14,13 @@ using Services.Administration;
 
 namespace WebApi.Controllers
 {
-    public class ProductsController : ApiController
+    public class ProductsController : BaseApiController
     {
-        private readonly bool _commit = true;
-        private readonly ILog _log;
         private readonly ProductsService _service;
 
-        public ProductsController(ILog log, ProductsService service)
+        public ProductsController(OperationContext context, ILog log, ProductsService service) : base(context, log)
         {
-            _log = log;
             _service = service;
-#if DEBUG
-            _commit = false;
-#endif
         }
 
         // GET {base}/admin/products/{id}
@@ -52,54 +46,49 @@ namespace WebApi.Controllers
         [ActionName("Default")]
         public HttpResponseMessage Post(ProductModelCreateRequest product)
         {
-            using (var ts = new TransactionScope())
+            return Invoke(() =>
             {
                 var result = _service.AddProduct(product);
                 var response = Request.CreatePostResponseFor(result, WebApiConfig.ProductsRouteName, new { id = result.Value != null ? result.Value.ToString() : string.Empty});
-
-                if (_commit) ts.Complete();
                 return response;
-            }
+            });
         }
 
         // PUT {base}/admin/products/{id}
         [ActionName("Default")]
         public HttpResponseMessage Put(int id, ProductModelUpdateRequest product)
         {
-            using (var ts = new TransactionScope())
+            return Invoke(() =>
             {
                 product.ProductID = id;
                 var result = _service.UpdateProduct(product);
                 var response = Request.CreatePutResponseFor(result);
-                if (_commit) ts.Complete();
                 return response;
-            }
+            });
         }
 
         // PUT {base}/admin/products/{id}/mark-sold-out
         [ActionName("MarkSoldOut")]
         public HttpResponseMessage PutMarkSoldOut(int id)
         {
-            using (var ts = new TransactionScope())
+            return Invoke(() =>
             {
                 var result = _service.MarkProductSoldOut(id);
                 var response = Request.CreatePutResponseFor(result);
-                if (_commit) ts.Complete();
                 return response;
-            }
+            });
         }
 
         // DELETE {base}/admin/products/{id}
         [ActionName("Default")]
         public HttpResponseMessage Delete(int id)
         {
-            using (var ts = new TransactionScope())
+            return Invoke(() =>
             {
                 var result = _service.DeleteProduct(id);
                 var response = Request.CreateDeleteResponseFor(result);
-                if (_commit) ts.Complete();
                 return response;
-            }
+            });
         }
     }
 }
