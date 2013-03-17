@@ -45,13 +45,13 @@ Once you've completed these steps, you should be able to run the unit test proje
 
 (hey!3 acronyms in a row - sweet)
 
-- GET *http://localhost:60000/admin/products/680*
-- GET *http://localhost:60000/admin/products/*
-- GET *http://localhost:60000/admin/products?&top=5&skip=5*
-- GET *http://localhost:60000/admin/products?&top=5&skip=5&productname=LL%20Road%20Frame*
-- GET *http://localhost:60000/admin/products/1* (throws a 404)
+- GET **http://localhost:60000/admin/products/680**
+- GET **http://localhost:60000/admin/products/**
+- GET **http://localhost:60000/admin/products?&top=5&skip=5**
+- GET **http://localhost:60000/admin/products?&top=5&skip=5&productname=LL%20Road%20Frame**
+- GET **http://localhost:60000/admin/products/1** (throws a 404)
 
-- POST *http://localhost:60000/admin/products* 
+- POST **http://localhost:60000/admin/products**
 ```javascript
 {
  name : "iPhone7",
@@ -60,7 +60,7 @@ Once you've completed these steps, you should be able to run the unit test proje
  standardCost: 384.23
 }
 
-- POST *http://localhost:60000/admin/products* (invalid payload)
+- POST **http://localhost:60000/admin/products** (invalid payload)
 ```javascript
 {
  listPrice : 799.00,
@@ -68,7 +68,7 @@ Once you've completed these steps, you should be able to run the unit test proje
 }
 ```
 
-- PUT *http://localhost:60000/admin/products/680*
+- PUT **http://localhost:60000/admin/products/680**
 ```javascript
 {
   standardCost : 100.00,
@@ -76,7 +76,7 @@ Once you've completed these steps, you should be able to run the unit test proje
 }
 ```
 
-- PUT *http://localhost:60000/admin/products/1* (invalid product id)
+- PUT **http://localhost:60000/admin/products/1** (invalid product id)
 ```javascript
 {
   standardCost : 100.00,
@@ -84,8 +84,8 @@ Once you've completed these steps, you should be able to run the unit test proje
 }
 ```
 
-- PUT *http://localhost:60000/admin/products/680/mark-sold-out*
-- PUT *http://localhost:60000/admin/products/1/mark-sold-out* (invalid product id)
+- PUT **http://localhost:60000/admin/products/680/mark-sold-out**
+- PUT **http://localhost:60000/admin/products/1/mark-sold-out** (invalid product id)
 
-- DELETE *http://localhost:60000/admin/products/680*
-- DELETE *http://localhost:60000/admin/products/1* (invalid product id)
+- DELETE **http://localhost:60000/admin/products/680**
+- DELETE **http://localhost:60000/admin/products/1** (invalid product id)
