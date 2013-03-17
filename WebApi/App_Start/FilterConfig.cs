@@ -1,6 +1,13 @@
 ﻿#region Using directives
 
+using System.Reflection;
+using System.Web.Http;
 using System.Web.Mvc;
+using Autofac;
+using Common.Logging;
+using Core;
+using Core.Extensions;
+using Elmah.Contrib.WebApi;
 
 #endregion
 
@@ -12,6 +19,31 @@ namespace WebApi
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
             filters.Add(new HandleErrorAttribute());
+            GlobalConfiguration.Configuration.Filters.Add(new ElmahHandleErrorApiAttribute());
+            using (var container = IoC.Container.BeginLifetimeScope())
+            {
+                GlobalConfiguration.Configuration.Filters.Add(container.Resolve<CommonLogErrorApiAttribute>());
+            }
+        }
+
+        public class CommonLogErrorApiAttribute : System.Web.Http.Filters.ExceptionFilterAttribute
+        {
+            private readonly OperationContext _context;
+            private readonly ILog _log;
+
+            public CommonLogErrorApiAttribute(OperationContext context, ILog log)
+            {
+                _context = context;
+                _log = log;
+            }
+
+            public override void OnException(System.Web.Http.Filters.HttpActionExecutedContext actionExecutedContext)
+            {
+                if (actionExecutedContext.Exception != null)
+                    _log.Exception(GetType(), MethodBase.GetCurrentMethod(), _context, actionExecutedContext.Exception);
+
+                base.OnException(actionExecutedContext);
+            }
         }
     }
 }

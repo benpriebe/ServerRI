@@ -3,6 +3,8 @@
 using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
+using Autofac;
+using Elmah.Contrib.WebApi;
 
 #endregion
 

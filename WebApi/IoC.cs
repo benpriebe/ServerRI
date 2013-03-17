@@ -73,8 +73,11 @@ namespace WebApi
             // operationcontext
             builder.RegisterInstance(new OperationContext(new UserDetails(1.ToString(), "To Do", "to.do")));
 
-            Container = builder.Build();
+            // filters
+            builder.RegisterType<FilterConfig.CommonLogErrorApiAttribute>();
 
+            Container = builder.Build();
+            
             // webapi controller resolver
             var webApiDependencyResolver = new AutofacWebApiDependencyResolver(Container);
             GlobalConfiguration.Configuration.DependencyResolver = webApiDependencyResolver;

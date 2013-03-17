@@ -1,6 +1,10 @@
 ﻿#region Using directives
 
 using System.Web.Http;
+using Autofac;
+using Common.Logging;
+using Core;
+using Elmah.Contrib.WebApi;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -18,13 +22,7 @@ namespace WebApi
         public static void Configure(HttpConfiguration configuration)
         {
             ConfigureFormatters(configuration);
-            ConfigureFilters(configuration);
             RegisterRoutes(configuration.Routes);
-        }
-
-        private static void ConfigureFilters(HttpConfiguration configuration)
-        {
-            //configuration.Filters.Add(new AuthorizeAttribute());
         }
 
         private static void ConfigureFormatters(HttpConfiguration configuration)

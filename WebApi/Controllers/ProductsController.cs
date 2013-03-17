@@ -55,10 +55,7 @@ namespace WebApi.Controllers
             using (var ts = new TransactionScope())
             {
                 var result = _service.AddProduct(product);
-                var response = Request.CreatePostResponseFor(result, WebApiConfig.ProductsRouteName, new
-                {
-                    id = result.Value != null ? result.Value.ToString() : string.Empty
-                });
+                var response = Request.CreatePostResponseFor(result, WebApiConfig.ProductsRouteName, new { id = result.Value != null ? result.Value.ToString() : string.Empty});
 
                 if (_commit) ts.Complete();
                 return response;
