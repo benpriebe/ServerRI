@@ -51,6 +51,15 @@ Once you've completed these steps, you should be able to run the unit test proje
 - GET *http://localhost:60000/admin/products?&top=5&skip=5&productname=LL%20Road%20Frame*
 - GET *http://localhost:60000/admin/products/1* (throws a 404)
 
+- POST http://localhost:60000/admin/products 
+```javascript
+{
+ name : "iPhone7",
+ productNumber : "a1234",
+ listPrice : 799.00,
+ standardCost: 384.23
+}
+
 - POST http://localhost:60000/admin/products (invalid payload)
 ```javascript
 {
@@ -58,3 +67,21 @@ Once you've completed these steps, you should be able to run the unit test proje
  standardCost: 384.23
 }
 ```
+
+- PUT http://localhost:60000/admin/products/680
+```javascript
+{
+  standardCost : 100.00,
+  listPrice : 999.00
+}
+```
+
+- PUT http://localhost:60000/admin/products/1 (invalid product id)
+```javascript
+{
+  standardCost : 100.00,
+  listPrice : 999.00
+}
+```
+
+- PUT http://localhost:60000/admin/products/680/mark-sold-out
