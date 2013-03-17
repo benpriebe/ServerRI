@@ -4,10 +4,13 @@ using System.Configuration;
 using System.Data.Common;
 using System.Data.Entity;
 using System.Reflection;
+using System.Web.Http;
 using Autofac;
 using Autofac.Integration.Mvc;
 using Autofac.Integration.WebApi;
 using Contracts.Data;
+using Core;
+using Core.IoCModules;
 using Data;
 using Data.Entities;
 using Providers;
@@ -40,6 +43,7 @@ namespace WebApi
             builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
             builder.RegisterModelBinders(Assembly.GetExecutingAssembly());
 
+
             // database
             builder.Register(c => Database.DefaultConnectionFactory.CreateConnection(DbConnectionString))
                 .InstancePerHttpRequest()
@@ -63,7 +67,17 @@ namespace WebApi
             builder.RegisterType<ProductsProvider>().As<IProductsProvider>();
             builder.RegisterType<EFProvider<Customer>>().As<IProvider<Customer>>();
 
+            // logging
+            builder.RegisterModule<IoCLoggingModule>();
+
+            // operationcontext
+            builder.RegisterInstance(new OperationContext(new UserDetails(1.ToString(), "To Do", "to.do")));
+
             Container = builder.Build();
+
+            // webapi controller resolver
+            var webApiDependencyResolver = new AutofacWebApiDependencyResolver(Container);
+            GlobalConfiguration.Configuration.DependencyResolver = webApiDependencyResolver;
         }
     }
 }

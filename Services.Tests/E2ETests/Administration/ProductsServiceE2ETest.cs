@@ -4,8 +4,10 @@ using System;
 using System.Linq;
 using System.Transactions;
 using Autofac;
+using MSTestExtensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Models.Administration.Products;
+using Providers;
 using Services.Administration;
 
 #endregion
@@ -22,7 +24,7 @@ namespace Services.Tests.E2ETests.Administration
         public void AddProduct_BareBones()
         {
             //Arrange
-            var product = new ProductModelRequest
+            var product = new ProductModelCreateRequest
             {
                 Name = "iPhone 7",
                 ListPrice = 999.90M,
@@ -48,6 +50,17 @@ namespace Services.Tests.E2ETests.Administration
             }
         }
 
+        [TestMethod]
+        public void UpdateProduct_Success()
+        {
+            throw new NotImplementedException("Left as an excercise for the reader");
+        }
+
+        [TestMethod]
+        public void UpdateProduct_Failure()
+        {
+            throw new NotImplementedException("Left as an excercise for the reader");
+        }
 
         [TestMethod]
         public void GetProductById_ValidProductID()
@@ -70,12 +83,13 @@ namespace Services.Tests.E2ETests.Administration
             var result = _service.GetProductById(1);
             //Assert
             Assert.IsTrue(result.Failure);
-            Assert.AreEqual(1, result.Messages.Count);
-            Assert.AreEqual(ServiceMessages.ProductNotFound.Code, result.Messages[0].Code);
+            Assert.IsNull(result.Value);
+            Assert.IsTrue(result.Messages.Any(m => m.Code == (int)ServiceMessages.Codes.ProductNotFound));
+
         }
 
         [TestMethod]
-        public void GetProducts_NoResults()
+        public void GetProducts_Filtered()
         {
             throw new NotImplementedException("Left as an excercise for the reader.");
         }
@@ -112,7 +126,7 @@ namespace Services.Tests.E2ETests.Administration
         public void DeleteProduct_ValidProductId()
         {
             //Arrange
-            var product = new ProductModelRequest
+            var product = new ProductModelCreateRequest
             {
                 Name = "iPhone 7",
                 ListPrice = 999.90M,
@@ -131,8 +145,9 @@ namespace Services.Tests.E2ETests.Administration
 
                 var result = _service.GetProductById(product.Id);
                 Assert.IsTrue(result.Failure);
-                Assert.AreEqual(1, result.Messages.Count);
-                Assert.AreEqual(ServiceMessages.ProductNotFound.Code, result.Messages[0].Code);
+                Assert.IsNull(result.Value);
+                Assert.IsTrue(result.Messages.Any(m => m.Code == (int)ServiceMessages.Codes.ProductNotFound));
+
             }
         }
 
@@ -143,10 +158,9 @@ namespace Services.Tests.E2ETests.Administration
             const int productId = -9876;
             using (new TransactionScope())
             {
-                //Act
-                var result = _service.DeleteProduct(productId);
-                //Assert
-                Assert.IsTrue(result.Success);
+                // Act/Assert
+                ExceptionAssert.Throws<ProviderException>(() => _service.DeleteProduct(productId));
+
             }
         }
     }

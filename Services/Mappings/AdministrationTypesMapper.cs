@@ -22,7 +22,7 @@ namespace Services.Mappings
                 .ForMember(d => d.Id, opt => opt.MapFrom(s => s.ProductID))
                 .ReverseMap();
 
-            mapperConfig.CreateMap<Product, ProductModelRequest>()
+            mapperConfig.CreateMap<Product, ProductModelCreateRequest>()
                 .ForMember(d => d.Id, opt => opt.MapFrom(s => s.ProductID))
                 .ReverseMap();
 

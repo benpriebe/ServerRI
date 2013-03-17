@@ -45,7 +45,7 @@ namespace Services.Tests.UnitTests.Administration
         public void AddProduct_BareBones()
         {
             //Arrange 
-            var productModel = new ProductModelRequest
+            var productModel = new ProductModelCreateRequest
             {
                 Name = "iPhone 7",
                 ListPrice = 999.90M,
@@ -71,7 +71,7 @@ namespace Services.Tests.UnitTests.Administration
         [TestMethod]
         public void AddProduct_ViolatesSqlConstraints()
         {
-            var productModel = new ProductModelRequest
+            var productModel = new ProductModelCreateRequest
             {
                 Name = "iPhone 7",
                 ListPrice = 999.90M,
@@ -91,6 +91,18 @@ namespace Services.Tests.UnitTests.Administration
         }
 
         [TestMethod]
+        public void UpdateProduct_Success()
+        {
+            throw new NotImplementedException("Left as an excercise for the reader");
+        }
+
+        [TestMethod]
+        public void UpdateProduct_Failure()
+        {
+            throw new NotImplementedException("Left as an excercise for the reader");
+        }
+
+        [TestMethod]
         public void GetProductById_InvalidProductID()
         {
             //Arrange
@@ -103,8 +115,8 @@ namespace Services.Tests.UnitTests.Administration
             //Assert
             _mockProvider.VerifyAll();
             Assert.IsTrue(result.Failure);
-            Assert.AreEqual(1, result.Messages.Count);
-            Assert.AreEqual(ServiceMessages.ProductNotFound.Code, result.Messages[0].Code);
+            Assert.IsNull(result.Value); 
+            Assert.IsTrue(result.Messages.Any(m => m.Code == (int) ServiceMessages.Codes.ProductNotFound));
         }
 
         [TestMethod]
@@ -132,9 +144,8 @@ namespace Services.Tests.UnitTests.Administration
             Assert.AreEqual(product.ProductCategory.ParentProductCategoryID, result.Value.ParentProductCategoryID);
         }
 
-
         [TestMethod]
-        public void GetProducts_NoResults()
+        public void GetProducts_Filtered()
         {
             throw new NotImplementedException("Left as an excercise for the reader.");
         }

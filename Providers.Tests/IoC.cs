@@ -5,6 +5,7 @@ using System.Data.Common;
 using System.Data.Entity;
 using Autofac;
 using Contracts.Data;
+using Core;
 using Core.IoCModules;
 using Data;
 using Data.Entities;
@@ -48,6 +49,9 @@ namespace Providers.Tests
 
             // logging
             builder.RegisterModule<IoCLoggingModule>();
+
+            // operationcontext
+            builder.RegisterInstance(new OperationContext(new UserDetails(1.ToString(), "Riff Raff", "riff.raff")));
 
             Container = builder.Build();
         }

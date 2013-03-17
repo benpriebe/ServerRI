@@ -72,6 +72,18 @@ namespace Providers.Tests.UnitTests.Administration
         }
 
         [TestMethod]
+        public void UpdateProduct_Success()
+        {
+            throw new NotImplementedException("Left as an excercise for the reader");
+        }
+        
+        [TestMethod]
+        public void UpdateProduct_Failure()
+        {
+            throw new NotImplementedException("Left as an excercise for the reader");
+        }
+
+        [TestMethod]
         public void GetProductById_ValidProductID()
         {
             using (var uow = IoC.Container.Resolve<IUnitOfWork>())
@@ -113,7 +125,7 @@ namespace Providers.Tests.UnitTests.Administration
         }
 
         [TestMethod]
-        public void GetProducts_NoResults()
+        public void GetProducts_Filtered()
         {
             throw new NotImplementedException("Left as an excercise for the reader");
         }
@@ -183,9 +195,8 @@ namespace Providers.Tests.UnitTests.Administration
         {
             using (var uow = IoC.Container.Resolve<IUnitOfWork>())
             {
-                //Act/Assert
-                uow.Products.Delete(-99);
-                uow.Commit();
+                // Act/Assert
+                ExceptionAssert.Throws<ProviderException>(() => uow.Products.Delete(-99));
             }
 
             using (var uow = IoC.Container.Resolve<IUnitOfWork>())
@@ -212,5 +223,4 @@ namespace Providers.Tests.UnitTests.Administration
         }
     }
 }
-
-//       
+       

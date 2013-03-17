@@ -70,6 +70,7 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="NotFoundProviderException.cs" />
     <Compile Include="ProviderException.cs" />
     <Compile Include="EFProvider.cs" />
     <Compile Include="Administration\ProductsProvider.cs" />

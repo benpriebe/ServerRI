@@ -42,8 +42,11 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Administration\FilterRequest.cs" />
+    <Compile Include="Administration\Products\ProductModelFilterRequest.cs" />
+    <Compile Include="Administration\Products\ProductModelUpdateRequest.cs" />
     <Compile Include="Administration\Products\ProductModel.cs" />
-    <Compile Include="Administration\Products\ProductModelRequest.cs" />
+    <Compile Include="Administration\Products\ProductModelCreateRequest.cs" />
     <Compile Include="Administration\Products\ProductModelResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

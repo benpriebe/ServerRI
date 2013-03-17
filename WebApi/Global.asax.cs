@@ -13,8 +13,9 @@ namespace WebApi
     {
         protected void Application_Start()
         {
+            IoC.BuildContainer();
             AreaRegistration.RegisterAllAreas();
-            WebApiConfig.Register(GlobalConfiguration.Configuration);
+            WebApiConfig.Configure(GlobalConfiguration.Configuration);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
         }
     }

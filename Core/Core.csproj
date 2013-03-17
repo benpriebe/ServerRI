@@ -60,6 +60,7 @@
     <Compile Include="IoCModules\IoCLoggingModule.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Extensions\LoggingExtensions.cs" />
+    <Compile Include="OperationContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -67,9 +68,6 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="Configuration\Log4Net.config">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Configuration\Common.Logging.config">
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />
