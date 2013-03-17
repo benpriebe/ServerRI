@@ -43,7 +43,7 @@ Once you've completed these steps, you should be able to run the unit test proje
 
 ###REST API URLS###
 
-(hey!3 acronyms in a row - sweet)
+(hey! 3 acronyms in a row - sweet)
 
 - GET **http://localhost:60000/admin/products/680**
 - GET **http://localhost:60000/admin/products/**
