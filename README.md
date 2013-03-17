@@ -51,6 +51,9 @@ Once you've completed these steps, you should be able to run the unit test proje
 - GET **http://localhost:60000/admin/products?&top=5&skip=5&productname=LL%20Road%20Frame**
 - GET **http://localhost:60000/admin/products/1** (throws a 404)
 
+- GET **http://localhost:60000/admin/products?&top=5&skip=5&productname=error** (throws an exception)
+**note:** you can view the exception details at **http://localhost:60000/elmah.axd** and you should also receive an email if you configured your Log4Net SMTPAppender correctly.
+
 - POST **http://localhost:60000/admin/products**
 ```javascript
 {
