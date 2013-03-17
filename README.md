@@ -1,7 +1,28 @@
-ServerRI
+#ServerRI#
 ========
 
-An fully working overly engineered server side webapi solution
+An fully working overly engineered server side webapi solution.
+
+The architecture for this server side solution incorporates the following patterns and technologies:
+
+- Entity Framework 5x (Code First)
+- Repository Pattern
+- Unit of Work Pattern
+- IoC (using AutoFac)
+- A Service API using DTOs (models) and AutoMapper
+- .NET WebAPI REST architecture (with REST-RPC extensions when needed).
+
+The solution is very enterprisey with lots of layers to enable extreme abstraction and unit testing. 
+
+It aims to demonstrate how to handle:
+ - exceptions
+ - logging
+ - validation
+ - unit testing (mocking)
+ - e2e testing (end-to-end)
+ 
+
+*NOTE:* If you're looking for something simpler I suggest you move along.
 
 ##Pre-Requisites:##
 
