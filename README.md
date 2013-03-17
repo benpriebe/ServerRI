@@ -15,13 +15,13 @@ The architecture for this server side solution incorporates the following patter
 The solution is very enterprisey with lots of layers to enable extreme abstraction and unit testing. 
 
 It aims to demonstrate how to handle:
+ - dependency injection (autofac)
  - exceptions
- - logging
+ - logging (common.logging)
  - validation
- - unit testing (mocking)
+ - unit testing (mocking with moq)
  - e2e testing (end-to-end)
  
-
 *NOTE:* If you're looking for something simpler I suggest you move along.
 
 ##Pre-Requisites:##
@@ -40,3 +40,5 @@ Alternately, change connection strings to work with your own configuration (Core
 Modify Core/Configuration/Log4Net.config SMTPAppender to use your own smtp server.
 
 Once you've completed these steps, you should be able to run the unit test projects and also fire up the webapi project and hit it.
+
+## REST API URLS (hey!3 acronyms in a row - sweet)##
