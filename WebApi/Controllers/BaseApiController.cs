@@ -1,9 +1,14 @@
-﻿using System;
+﻿#region Using directives
+
+using System;
 using System.Net.Http;
 using System.Transactions;
 using System.Web.Http;
 using Common.Logging;
 using Core;
+
+#endregion
+
 
 namespace WebApi.Controllers
 {

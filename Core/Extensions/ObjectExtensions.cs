@@ -1,6 +1,5 @@
 ﻿#region Using directives
 
-using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -11,7 +10,7 @@ namespace Core.Extensions
 {
     public static class ObjectExtensions
     {
-        internal static JsonSerializerSettings JsonSerializerSettings; 
+        internal static JsonSerializerSettings JsonSerializerSettings;
 
         static ObjectExtensions()
         {

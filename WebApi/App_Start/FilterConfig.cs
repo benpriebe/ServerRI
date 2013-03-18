@@ -2,6 +2,7 @@
 
 using System.Reflection;
 using System.Web.Http;
+using System.Web.Http.Filters;
 using System.Web.Mvc;
 using Autofac;
 using Common.Logging;
@@ -26,7 +27,7 @@ namespace WebApi
             }
         }
 
-        public class CommonLogErrorApiAttribute : System.Web.Http.Filters.ExceptionFilterAttribute
+        public class CommonLogErrorApiAttribute : ExceptionFilterAttribute
         {
             private readonly OperationContext _context;
             private readonly ILog _log;
@@ -37,7 +38,7 @@ namespace WebApi
                 _log = log;
             }
 
-            public override void OnException(System.Web.Http.Filters.HttpActionExecutedContext actionExecutedContext)
+            public override void OnException(HttpActionExecutedContext actionExecutedContext)
             {
                 if (actionExecutedContext.Exception != null)
                     _log.Exception(GetType(), MethodBase.GetCurrentMethod(), _context, actionExecutedContext.Exception);

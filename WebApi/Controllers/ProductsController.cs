@@ -49,7 +49,10 @@ namespace WebApi.Controllers
             return Invoke(() =>
             {
                 var result = _service.AddProduct(product);
-                var response = Request.CreatePostResponseFor(result, WebApiConfig.ProductsRouteName, new { id = result.Value != null ? result.Value.ToString() : string.Empty});
+                var response = Request.CreatePostResponseFor(result, WebApiConfig.ProductsRouteName, new
+                {
+                    id = result.Value != null ? result.Value.ToString() : string.Empty
+                });
                 return response;
             });
         }

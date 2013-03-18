@@ -70,14 +70,17 @@ namespace WebApi
             // logging
             builder.RegisterModule<IoCLoggingModule>();
 
-            // operationcontext
-            builder.RegisterInstance(new OperationContext(new UserDetails(1.ToString(), "To Do", "to.do")));
+            //TODO: 18-Mar-2013 - Ben - Figure out how to do this with chose authentication model.
+            // operationcontext - should only have one instance per thread/user
+            builder.RegisterInstance(new OperationContext(new UserDetails(1.ToString(), "To Do", "to.do")))
+                .InstancePerHttpRequest()
+                .InstancePerApiRequest();
 
             // filters
             builder.RegisterType<FilterConfig.CommonLogErrorApiAttribute>();
 
             Container = builder.Build();
-            
+
             // webapi controller resolver
             var webApiDependencyResolver = new AutofacWebApiDependencyResolver(Container);
             GlobalConfiguration.Configuration.DependencyResolver = webApiDependencyResolver;

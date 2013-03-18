@@ -1,5 +1,10 @@
-﻿using System;
+﻿#region Using directives
+
+using System;
 using System.Collections.Generic;
+
+#endregion
+
 
 namespace Providers
 {

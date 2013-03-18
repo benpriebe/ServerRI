@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Api.Common;
 using Autofac;
 using Contracts.Data;
 using Data.Entities;
@@ -114,9 +115,10 @@ namespace Services.Tests.UnitTests.Administration
 
             //Assert
             _mockProvider.VerifyAll();
+            Assert.IsTrue(result.NotFound);
             Assert.IsTrue(result.Failure);
-            Assert.IsNull(result.Value); 
-            Assert.IsTrue(result.Messages.Any(m => m.Code == (int) ServiceMessages.Codes.ProductNotFound));
+            Assert.IsTrue(result.Messages.Any(m => m.Code == (int)MessageCodes.NotFound));
+
         }
 
         [TestMethod]

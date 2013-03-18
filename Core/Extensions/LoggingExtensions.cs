@@ -1,6 +1,11 @@
-﻿using System;
+﻿#region Using directives
+
+using System;
 using System.Reflection;
 using Common.Logging;
+
+#endregion
+
 
 namespace Core.Extensions
 {
@@ -25,7 +30,7 @@ namespace Core.Extensions
         {
             Debug(log, type, method, context, String.Format("Entered {0} ", String.Empty));
         }
-        
+
         public static void Enter(this ILog log, Type type, MethodBase method, OperationContext context, string message)
         {
             Debug(log, type, method, context, String.Format("Entered {0} ", message));
@@ -50,6 +55,5 @@ namespace Core.Extensions
         {
             log.Error(m => m.Invoke("{2} : {0}:{1} - Exception {3} ", type.Name, method.Name, context.UserDetails.LogName, message), e);
         }
-
     }
 }

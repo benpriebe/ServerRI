@@ -1,6 +1,6 @@
 ﻿namespace Models.Administration.Products
 {
-    public class ProductModelUpdateRequest 
+    public class ProductModelUpdateRequest
     {
         public int ProductID { get; set; }
         public decimal StandardCost { get; set; }

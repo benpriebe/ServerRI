@@ -1,4 +1,9 @@
-﻿using Api.Common;
+﻿#region Using directives
+
+using Api.Common;
+
+#endregion
+
 
 namespace Services
 {
@@ -10,14 +15,9 @@ namespace Services
             ProviderError = 0666,
 
             // product related errors prefixed with 100;
-            ProductNotFound = 0001,
+
 
             // customer related errors prefixed with 200;
         };
-
-        public static Message ProductNotFound(int productId)
-        {
-            return new Message(MessageLevel.Error, (int) Codes.ProductNotFound, "Product - {0} - not found.", productId.ToString());
-        }
     }
 }

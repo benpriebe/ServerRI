@@ -48,7 +48,7 @@ namespace Services.Administration
             catch (ProviderException e)
             {
                 _log.Exception(GetType(), MethodBase.GetCurrentMethod(), Context, e, e.Errors.ToJson());
-                return ResultExtensions.Create<int?>(e, (int)ServiceMessages.Codes.ProviderError);
+                return ResultExtensions.Create<int?>(e, (int) ServiceMessages.Codes.ProviderError);
             }
 
             product.Id = entity.ProductID;
@@ -59,7 +59,7 @@ namespace Services.Administration
 
         public Result MarkProductSoldOut(int productId)
         {
-            return UpdateProduct(new ProductModelUpdateRequest()
+            return UpdateProduct(new ProductModelUpdateRequest
             {
                 ProductID = productId,
                 StandardCost = 0 // this is how i'm representing sold out. dodgy i know. illustrative purposes only.
@@ -75,15 +75,15 @@ namespace Services.Administration
                 using (var uow = UoW())
                 {
                     var entity = uow.Products.GetById(product.ProductID);
-                    
+
                     if (entity == null)
                     {
-                        return Result.Create(ServiceMessages.ProductNotFound(product.ProductID));
+                        return Result.CreateNotFound<Product>(product.ProductID);
                     }
                     entity.ListPrice = product.ListPrice;
                     entity.StandardCost = product.StandardCost;
                     entity.ModifiedDate = DateTime.UtcNow;
-                    
+
                     uow.Commit();
                     _log.Info(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format(" product updated - id = {0}", entity.ProductID));
                 }
@@ -91,7 +91,7 @@ namespace Services.Administration
             catch (ProviderException e)
             {
                 _log.Exception(GetType(), MethodBase.GetCurrentMethod(), Context, e, e.Errors.ToJson());
-                return ResultExtensions.Create(e, (int)ServiceMessages.Codes.ProviderError);
+                return ResultExtensions.Create(e, (int) ServiceMessages.Codes.ProviderError);
             }
 
             _log.Exit(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with product {0}", product.ToJson()));
@@ -110,9 +110,9 @@ namespace Services.Administration
                     uow.Products.Delete(productId);
                     uow.Commit();
                 }
-                catch (NotFoundProviderException e)
+                catch (NotFoundProviderException)
                 {
-                    return Result.Create(ServiceMessages.ProductNotFound(productId));
+                    return Result.CreateNotFound<Product>(productId);
                 }
                 _log.Exit(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with productId {0}", productId));
                 return Result.CreateEmpty();
@@ -129,7 +129,7 @@ namespace Services.Administration
                 _log.Exit(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with productId {0}", productId));
 
                 return entity == null
-                    ? Result<ProductModelResponse>.Create(ServiceMessages.ProductNotFound(productId)) 
+                    ? Result<ProductModelResponse>.CreateNotFound<Product>(productId)
                     : Result<ProductModelResponse>.Create(Mapper.Map<ProductModelResponse>(entity));
             }
         }
@@ -155,7 +155,7 @@ namespace Services.Administration
                     query = filter.Top.HasValue ? query.Take(filter.Top.Value) : query;
                 }
                 var entities = query.ToList();
-                _log.Exit(GetType(), MethodBase.GetCurrentMethod(),Context);
+                _log.Exit(GetType(), MethodBase.GetCurrentMethod(), Context);
                 return Result<IList<ProductModel>>.Create(Mapper.Map<IList<ProductModel>>(entities));
             }
         }

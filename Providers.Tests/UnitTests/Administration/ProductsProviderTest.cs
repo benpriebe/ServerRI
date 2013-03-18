@@ -76,7 +76,7 @@ namespace Providers.Tests.UnitTests.Administration
         {
             throw new NotImplementedException("Left as an excercise for the reader");
         }
-        
+
         [TestMethod]
         public void UpdateProduct_Failure()
         {
@@ -223,4 +223,3 @@ namespace Providers.Tests.UnitTests.Administration
         }
     }
 }
-       

@@ -3,6 +3,7 @@
 using System;
 using System.Linq;
 using System.Transactions;
+using Api.Common;
 using Autofac;
 using MSTestExtensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -81,10 +82,11 @@ namespace Services.Tests.E2ETests.Administration
         {
             //Act
             var result = _service.GetProductById(1);
+            
             //Assert
+            Assert.IsTrue(result.NotFound);
             Assert.IsTrue(result.Failure);
-            Assert.IsNull(result.Value);
-            Assert.IsTrue(result.Messages.Any(m => m.Code == (int)ServiceMessages.Codes.ProductNotFound));
+            Assert.IsTrue(result.Messages.Any(m => m.Code == (int)MessageCodes.NotFound));
 
         }
 
@@ -144,9 +146,9 @@ namespace Services.Tests.E2ETests.Administration
                 Assert.IsTrue(deleteResult.Success);
 
                 var result = _service.GetProductById(product.Id);
+                Assert.IsTrue(result.NotFound);
                 Assert.IsTrue(result.Failure);
-                Assert.IsNull(result.Value);
-                Assert.IsTrue(result.Messages.Any(m => m.Code == (int)ServiceMessages.Codes.ProductNotFound));
+                Assert.IsTrue(result.Messages.Any(m => m.Code == (int)MessageCodes.NotFound));
 
             }
         }
@@ -158,9 +160,13 @@ namespace Services.Tests.E2ETests.Administration
             const int productId = -9876;
             using (new TransactionScope())
             {
-                // Act/Assert
-                ExceptionAssert.Throws<ProviderException>(() => _service.DeleteProduct(productId));
+                // Act
+                var result = _service.DeleteProduct(productId);
 
+                // Assert
+                Assert.IsTrue(result.NotFound);
+                Assert.IsTrue(result.Failure);
+                Assert.IsTrue(result.Messages.Any(m => m.Code == (int)MessageCodes.NotFound));
             }
         }
     }

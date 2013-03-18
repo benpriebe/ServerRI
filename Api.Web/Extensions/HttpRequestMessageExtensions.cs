@@ -18,7 +18,7 @@ namespace Api.Web.Extensions
         {
             return result.Success
                 ? request.CreateResponse(HttpStatusCode.NoContent)
-                : request.CreateFailureResponseFor(result.Messages);
+                : request.CreateFailureResponseFor(result.Messages, result.NotFound ? HttpStatusCode.NotFound : HttpStatusCode.BadRequest);
         }
 
         private static HttpResponseMessage CreateDefaultResponseFor<TResult, TValue>(this HttpRequestMessage request, Result<TResult> result, TValue value)
@@ -30,10 +30,10 @@ namespace Api.Web.Extensions
                     : request.CreateResponse(HttpStatusCode.NoContent);
             }
 
-            return request.CreateFailureResponseFor(result.Messages);
+            return request.CreateFailureResponseFor(result.Messages, result.NotFound ? HttpStatusCode.NotFound : HttpStatusCode.BadRequest);
         }
 
-        public static HttpResponseMessage CreateFailureResponseFor(this HttpRequestMessage request, IList<Message> messages, HttpStatusCode statusCode = HttpStatusCode.InternalServerError)
+        public static HttpResponseMessage CreateFailureResponseFor(this HttpRequestMessage request, IList<Message> messages, HttpStatusCode statusCode = HttpStatusCode.BadRequest)
         {
             return messages != null
                 ? request.CreateResponse(statusCode, messages)
@@ -87,7 +87,7 @@ namespace Api.Web.Extensions
                 return response;
             }
 
-            return request.CreateFailureResponseFor(result.Messages);
+            return request.CreateFailureResponseFor(result.Messages, result.NotFound ? HttpStatusCode.NotFound : HttpStatusCode.BadRequest);
         }
 
         public static HttpResponseMessage CreatePostResponseFor<T>(this HttpRequestMessage request, Result<T> result, string locationRouteName, object locationRouteValues)
@@ -112,8 +112,7 @@ namespace Api.Web.Extensions
             return request.CreatePostResponseFor(result, GetValueFor(result, selector), () => location);
         }
 
-        private static IEnumerable<TResult> GetValueFor<T, TSource, TResult>(Result<T> result, Func<TSource, TResult> selector)
-            where T : IEnumerable<TSource>
+        private static IEnumerable<TResult> GetValueFor<T, TSource, TResult>(Result<T> result, Func<TSource, TResult> selector) where T : IEnumerable<TSource>
         {
             return result.Value != null ? result.Value.Select(selector) : null;
         }
@@ -129,7 +128,7 @@ namespace Api.Web.Extensions
                 return response;
             }
 
-            return request.CreateFailureResponseFor(result.Messages);
+            return request.CreateFailureResponseFor(result.Messages, result.NotFound ? HttpStatusCode.NotFound : HttpStatusCode.BadRequest);
         }
 
         public static HttpResponseMessage CreatePutResponseFor(this HttpRequestMessage request, Result result)
@@ -142,8 +141,7 @@ namespace Api.Web.Extensions
             return request.CreateDefaultResponseFor(result, result.Value);
         }
 
-        public static HttpResponseMessage CreatePutResponseFor<T, TSource, TResult>(this HttpRequestMessage request, Result<T> result, Func<TSource, TResult> selector)
-            where T : IEnumerable<TSource>
+        public static HttpResponseMessage CreatePutResponseFor<T, TSource, TResult>(this HttpRequestMessage request, Result<T> result, Func<TSource, TResult> selector) where T : IEnumerable<TSource>
         {
             return request.CreateDefaultResponseFor(result, result.Value != null ? result.Value.Select(selector) : null);
         }
@@ -158,11 +156,20 @@ namespace Api.Web.Extensions
             return request.CreateDefaultResponseFor(result, result.Value);
         }
 
-        public static HttpResponseMessage CreateDeleteResponseFor<T, TSource, TResult>(this HttpRequestMessage request, Result<T> result, Func<TSource, TResult> selector)
-            where T : IEnumerable<TSource>
+        public static HttpResponseMessage CreateDeleteResponseFor<T, TSource, TResult>(this HttpRequestMessage request, Result<T> result, Func<TSource, TResult> selector) where T : IEnumerable<TSource>
         {
             return request.CreateDefaultResponseFor(result, result.Value != null ? result.Value.Select(selector) : null);
         }
+
+        private static Uri GetAbsoluteRouteUriFor(this HttpRequestMessage request, string routeName, object routeValues)
+        {
+            return new Uri(request.RequestUri, request.GetUrlHelper().Route(routeName, routeValues));
+        }
+
+
+        #region Generice Response Convenience Methods
+
+        /* Generic Response Convenience Methods - only use if you don't have a Result object */
 
         public static HttpResponseMessage CreateBadRequestResponse(this HttpRequestMessage request)
         {
@@ -184,9 +191,6 @@ namespace Api.Web.Extensions
             return request.CreateResponse(HttpStatusCode.Forbidden);
         }
 
-        private static Uri GetAbsoluteRouteUriFor(this HttpRequestMessage request, string routeName, object routeValues)
-        {
-            return new Uri(request.RequestUri, request.GetUrlHelper().Route(routeName, routeValues));
-        }
+        #endregion
     }
 }

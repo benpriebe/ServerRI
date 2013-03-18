@@ -18,6 +18,11 @@ namespace Api.Common
             get { return !Success; }
         }
 
+        public bool NotFound
+        {
+            get { return Messages != null && Messages.Any(m => m.Code == (int) MessageCodes.NotFound); }
+        }
+
         public List<Message> Messages { get; set; }
 
         public string ToMessageText(string delimiter = "\n")
@@ -31,6 +36,14 @@ namespace Api.Common
             {
                 Success = true
             };
+        }
+
+        public static Result CreateNotFound<TEntity>(object identity) where TEntity : class
+        {
+            return Create(new[]
+            {
+                new Message(MessageLevel.Error, (int) MessageCodes.NotFound, "{0} - {1}", typeof(TEntity).Name, identity.ToString())
+            });
         }
 
         public static Result Create(Message message)
@@ -66,6 +79,11 @@ namespace Api.Common
             get { return !Success; }
         }
 
+        public bool NotFound
+        {
+            get { return Messages != null && Messages.Any(m => m.Code == (int) MessageCodes.NotFound); }
+        }
+
         public T Value { get; set; }
         public List<Message> Messages { get; set; }
 
@@ -87,6 +105,14 @@ namespace Api.Common
             return Create(new[]
             {
                 message
+            });
+        }
+
+        public static Result<T> CreateNotFound<TEntity>(object identity) where TEntity : class
+        {
+            return Create(new[]
+            {
+                new Message(MessageLevel.Error, (int) MessageCodes.NotFound, "{0} - {1}", typeof(TEntity).Name, identity.ToString())
             });
         }
 

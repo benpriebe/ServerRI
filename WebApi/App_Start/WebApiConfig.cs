@@ -1,10 +1,6 @@
 ﻿#region Using directives
 
 using System.Web.Http;
-using Autofac;
-using Common.Logging;
-using Core;
-using Elmah.Contrib.WebApi;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -35,11 +31,14 @@ namespace WebApi
 
         public static void RegisterRoutes(HttpRouteCollection routes)
         {
-                routes.MapHttpRoute(
+            routes.MapHttpRoute(
                 name: ProductsSoldOutRouteName,
                 routeTemplate: "admin/products/{id}/mark-sold-out",
-                defaults: new {controller = "Products", action = "MarkSoldOut"}
-            );
+                defaults: new
+                {
+                    controller = "Products", action = "MarkSoldOut"
+                }
+                );
 
             routes.MapHttpRoute(
                 name: ProductsRouteName,
@@ -48,7 +47,6 @@ namespace WebApi
                 {
                     controller = "Products", id = RouteParameter.Optional, action = "Default"
                 });
-
         }
     }
 }
