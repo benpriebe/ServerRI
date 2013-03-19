@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using Api.Common;
@@ -11,6 +12,7 @@ using Core;
 using Core.Extensions;
 using Data.Entities;
 using Models.Administration.Products;
+using Models.Resx;
 using Providers;
 
 #endregion
@@ -27,9 +29,24 @@ namespace Services.Administration
             _log = log;
         }
 
+        public List<ValidationResult> Validate(params object[] models)
+        {
+            List<ValidationResult> validationResults = new List<ValidationResult>();
+            foreach (var model in models)
+            {
+                var vc = new ValidationContext(model, null, null);
+                Validator.TryValidateObject(model, vc, validationResults);
+            }
+            return validationResults;
+        }
+
         public Result<int?> AddProduct(ProductModelCreateRequest product)
         {
             _log.Enter(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with product {0}", product.ToJson()));
+
+            // validates the model using data annotations and the IValidatableObject interface method.
+            var results = Validate(product);
+            if (results.Any()) return Result<int?>.CreateValidationErrors(results.ToArray());
 
             var utcNow = DateTime.UtcNow;
             var entity = Mapper.Map<Product>(product);
@@ -40,6 +57,12 @@ namespace Services.Administration
             {
                 using (var uow = UoW())
                 {
+                    // more complex validation - requires a database lookup.
+                    if (uow.Products.GetAll().Any(p => p.ProductNumber == product.ProductNumber))
+                    {
+                        return Result<int?>.CreateValidationErrors(new ValidationResult(String.Format(LocalizedErrors.ProductsService_AddProduct_ErrorCode1, product.ProductNumber), new[] { "ProductNumber" }));
+                    }
+                    
                     uow.Products.Add(entity);
                     uow.Commit();
                     _log.Info(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format(" product added - id = {0}", entity.ProductID));
@@ -69,6 +92,10 @@ namespace Services.Administration
         public Result UpdateProduct(ProductModelUpdateRequest product)
         {
             _log.Enter(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with product {0}", product.ToJson()));
+
+            // validates the model using data annotations and the IValidatableObject interface method.
+            var results = Validate(product);
+            if (results.Any()) return Result.CreateValidationErrors(results.ToArray());
 
             try
             {

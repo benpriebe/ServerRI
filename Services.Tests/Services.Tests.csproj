@@ -59,6 +59,7 @@
       <HintPath>..\Providers.Tests\bin\Debug\MSTestExtensions.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Transactions" />

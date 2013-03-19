@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 
 #endregion
@@ -44,6 +45,11 @@ namespace Api.Common
             {
                 new Message(MessageLevel.Error, (int) MessageCodes.NotFound, "{0} - {1}", typeof(TEntity).Name, identity.ToString())
             });
+        }
+
+        public static Result CreateValidationErrors(params ValidationResult[] errors)
+        {
+            return Create(errors.ToList().Select((vr) => new Message(MessageLevel.Error, (int)MessageCodes.ValidationError, vr.ErrorMessage, vr.MemberNames.ToArray())));
         }
 
         public static Result Create(Message message)
@@ -114,6 +120,11 @@ namespace Api.Common
             {
                 new Message(MessageLevel.Error, (int) MessageCodes.NotFound, "{0} - {1}", typeof(TEntity).Name, identity.ToString())
             });
+        }
+
+        public static Result<T> CreateValidationErrors(params ValidationResult[] errors)
+        {
+            return Create(errors.ToList().Select((vr) => new Message(MessageLevel.Error, (int) MessageCodes.ValidationError, vr.ErrorMessage, vr.MemberNames.ToArray())));
         }
 
         public static Result<T> Create(T value)

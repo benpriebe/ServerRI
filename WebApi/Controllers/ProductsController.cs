@@ -1,9 +1,13 @@
 ﻿#region Using directives
 
 using System;
+using System.Globalization;
 using System.Net.Http;
+using System.Threading;
 using System.Web.Http;
+using System.Web.Http.ModelBinding;
 using Api.Web.Extensions;
+using Autofac.Integration.WebApi;
 using Common.Logging;
 using Core;
 using Models.Administration.Products;
@@ -14,6 +18,7 @@ using Services.Administration;
 
 namespace WebApi.Controllers
 {
+    [AutofacControllerConfiguration]
     public class ProductsController : BaseApiController
     {
         private readonly ProductsService _service;

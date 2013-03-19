@@ -7,5 +7,6 @@
     public enum MessageCodes
     {
         NotFound = -404,
+        ValidationError = -1
     }
 }

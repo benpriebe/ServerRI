@@ -5,9 +5,11 @@ using System.Linq;
 using System.Transactions;
 using Api.Common;
 using Autofac;
+using Data.Entities;
 using MSTestExtensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Models.Administration.Products;
+using Models.Resx;
 using Providers;
 using Services.Administration;
 
@@ -48,6 +50,56 @@ namespace Services.Tests.E2ETests.Administration
                 Assert.AreEqual(result.Value.ListPrice, product.ListPrice);
                 Assert.AreEqual(result.Value.StandardCost, product.StandardCost);
                 Assert.IsTrue(result.Value.LastModifiedDate < DateTime.Now && result.Value.LastModifiedDate > DateTime.MinValue);
+            }
+        }
+
+        [TestMethod]
+        public void AddProduct_ModelValidationFails()
+        {
+            //Arrange 
+            var productModel = new ProductModelCreateRequest
+            {
+                Name = "iPhone 7",
+                ListPrice = 999.90M,
+                ProductNumber = "1",
+                StandardCost = 324.23M
+            };
+
+            using (new TransactionScope())
+            {
+                //Act
+                var result = _service.AddProduct(productModel);
+
+                //Assert
+                Assert.IsTrue(result.Failure);
+                Assert.IsTrue(result.Messages.Any());
+                Assert.IsTrue(result.Messages.Any(m => m.Code == (int) MessageCodes.ValidationError));
+                Assert.IsTrue(result.Messages.Any(m => String.Format(LocalizedErrors.ProductModelCreateRequest_ErrorCode_1, productModel.StandardCost, productModel.ProductNumber) == m.Phrase));
+            }
+        }
+
+        [TestMethod]
+        public void AddProduct_ValidationFailsDatabaseLookup()
+        {
+            //Arrange 
+            var productModel = new ProductModelCreateRequest
+            {
+                Name = "iPhone 7",
+                ListPrice = 999.90M,
+                ProductNumber = "HL-U509",
+                StandardCost = 324.23M
+            };
+
+            using (new TransactionScope())
+            {
+                //Act
+                var result = _service.AddProduct(productModel);
+
+                //Assert
+                Assert.IsTrue(result.Failure);
+                Assert.IsTrue(result.Messages.Any());
+                Assert.IsTrue(result.Messages.Any(m => m.Code == (int) MessageCodes.ValidationError));
+                Assert.IsTrue(result.Messages.Any(m => String.Format(LocalizedErrors.ProductsService_AddProduct_ErrorCode1, productModel.ProductNumber) == m.Phrase));
             }
         }
 
