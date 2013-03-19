@@ -1,17 +1,10 @@
 ﻿#region Using directives
 
-using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Data.Common;
 using System.Data.Entity;
-using System.Net.Http;
 using System.Reflection;
 using System.Web.Http;
-using System.Web.Http.Controllers;
-using System.Web.Http.Metadata;
-using System.Web.Http.Validation;
-using System.Web.ModelBinding;
 using Autofac;
 using Autofac.Integration.Mvc;
 using Autofac.Integration.WebApi;
@@ -20,14 +13,9 @@ using Core;
 using Core.IoCModules;
 using Data;
 using Data.Entities;
-using Models.Administration.Products;
 using Providers;
-using Providers.Administration;
+using Providers.External;
 using Services;
-using WebApi.Controllers;
-using IModelBinder = System.Web.Http.ModelBinding.IModelBinder;
-using ModelBinderProvider = System.Web.Http.ModelBinding.ModelBinderProvider;
-using ModelBindingContext = System.Web.Http.ModelBinding.ModelBindingContext;
 
 #endregion
 
@@ -53,8 +41,8 @@ namespace WebApi
             var builder = new ContainerBuilder();
 
             builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
-            //builder.RegisterModelBinders(Assembly.GetExecutingAssembly());
-            
+            builder.RegisterModelBinders(Assembly.GetExecutingAssembly());
+
             // database
             builder.Register(c => Database.DefaultConnectionFactory.CreateConnection(DbConnectionString))
                 .InstancePerApiRequest()
@@ -76,8 +64,8 @@ namespace WebApi
 
             builder.RegisterType<ProductsProvider>().As<IProductsProvider>();
             builder.RegisterType<EFProvider<Customer>>().As<IProvider<Customer>>();
+            builder.RegisterType<ExternalProvider>().As<IExternalProvider>();
 
-           
             //TODO: 18-Mar-2013 - Ben - Figure out how to do this with chose authentication model.
             // operationcontext - should only have one instance per thread/user
             builder.RegisterInstance(new OperationContext(new UserDetails(1.ToString(), "To Do", "to.do")));
@@ -87,7 +75,7 @@ namespace WebApi
 
             // filters
             builder.RegisterType<FilterConfig.CommonLogErrorApiAttribute>();
-            
+
             Container = builder.Build();
 
             // webapi controller resolver
@@ -95,5 +83,4 @@ namespace WebApi
             GlobalConfiguration.Configuration.DependencyResolver = webApiDependencyResolver;
         }
     }
-
 }

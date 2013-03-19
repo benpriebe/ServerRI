@@ -9,7 +9,7 @@ using Core;
 using Core.IoCModules;
 using Data;
 using Data.Entities;
-using Providers.Administration;
+using Providers.External;
 
 #endregion
 
@@ -46,6 +46,7 @@ namespace Providers.Tests
             builder.RegisterType<UnitOfWork>().As<IUnitOfWork>();
             builder.RegisterType<ProductsProvider>().As<IProductsProvider>();
             builder.RegisterType<EFProvider<Customer>>().As<IProvider<Customer>>();
+            builder.RegisterType<ExternalProvider>().As<IExternalProvider>();
 
             // logging
             builder.RegisterModule<IoCLoggingModule>();

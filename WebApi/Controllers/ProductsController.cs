@@ -8,7 +8,7 @@ using Autofac.Integration.WebApi;
 using Common.Logging;
 using Core;
 using Models.Administration.Products;
-using Services.Administration;
+using Services;
 
 #endregion
 

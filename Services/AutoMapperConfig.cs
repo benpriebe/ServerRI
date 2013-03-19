@@ -17,7 +17,7 @@ namespace Services
         public static MappingEngine CreateMappingEngine()
         {
             var mapperConfig = new ConfigurationStore(new TypeMapFactory(), MapperRegistry.AllMappers());
-            new AdministrationTypesMapper().ConfigureMap(mapperConfig);
+            new ProductMapper().ConfigureMap(mapperConfig);
 
             var mapper = new MappingEngine(mapperConfig);
             Mapper.AssertConfigurationIsValid();

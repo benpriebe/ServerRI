@@ -72,13 +72,14 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="External\ExternalProvider.cs" />
     <Compile Include="NotFoundProviderException.cs" />
     <Compile Include="ProviderException.cs" />
-    <Compile Include="EFProvider.cs" />
-    <Compile Include="Administration\ProductsProvider.cs" />
+    <Compile Include="Data\EFProvider.cs" />
+    <Compile Include="Data\ProductsProvider.cs" />
     <Compile Include="EFProviderException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UnitOfWork.cs" />
+    <Compile Include="Data\UnitOfWork.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Contracts\Contracts.csproj">

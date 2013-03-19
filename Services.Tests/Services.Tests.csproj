@@ -80,9 +80,9 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="E2ETests\Administration\ProductsServiceE2ETest.cs" />
+    <Compile Include="E2ETests\ProductsServiceE2ETest.cs" />
     <Compile Include="IoC.cs" />
-    <Compile Include="UnitTests\Administration\ProductsServiceTest.cs" />
+    <Compile Include="UnitTests\ProductsServiceTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

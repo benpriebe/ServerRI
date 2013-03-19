@@ -77,7 +77,7 @@
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="IoC.cs" />
-    <Compile Include="UnitTests\Administration\ProductsProviderTest.cs" />
+    <Compile Include="UnitTests\ProductsProviderTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

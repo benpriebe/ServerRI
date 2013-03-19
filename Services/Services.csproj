@@ -71,8 +71,8 @@
     <Compile Include="ResultExtensions.cs" />
     <Compile Include="AutoMapperConfig.cs" />
     <Compile Include="BaseService.cs" />
-    <Compile Include="Administration\ProductsService.cs" />
-    <Compile Include="Mappings\AdministrationTypesMapper.cs" />
+    <Compile Include="ProductsService.cs" />
+    <Compile Include="Mappings\ProductMapper.cs" />
     <Compile Include="Mappings\BaseTypeMapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceMessages.cs" />
