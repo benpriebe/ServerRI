@@ -60,6 +60,7 @@ namespace Services.Administration
                     // more complex validation - requires a database lookup.
                     if (uow.Products.GetAll().Any(p => p.ProductNumber == product.ProductNumber))
                     {
+                        //TODO: 19-Mar-2013 - Ben - Structure resx files appropriately. This is for demonstration but wrong. Shouldn't depend on the Model class for this message.
                         return Result<int?>.CreateValidationErrors(new ValidationResult(String.Format(LocalizedErrors.ProductsService_AddProduct_ErrorCode1, product.ProductNumber), new[] { "ProductNumber" }));
                     }
                     
