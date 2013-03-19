@@ -63,6 +63,7 @@ Once you've completed these steps, you should be able to run the unit test proje
  listPrice : 799.00,
  standardCost: 384.23
 }
+```
 
 - POST **http://localhost:60000/api/admin/products** (invalid payload)
 ```javascript
@@ -71,6 +72,7 @@ Once you've completed these steps, you should be able to run the unit test proje
  standardCost: 384.23
 }
 ```
+
 - POST **http://localhost:60000/api/admin/products** (simple model validation failure)
 
 **note:** pass in a "accept-language: en-au" request header to get back a localized error message.
@@ -85,13 +87,14 @@ Once you've completed these steps, you should be able to run the unit test proje
 ```
 
 - POST **http://localhost:60000/api/admin/products** (model validation failure that goes off to the db)
-
+```javascript
 {
  name : "iPhone7",
  productNumber : "HL-U509",
  listPrice : 99.00,
  standardCost: 99
 }
+```
 
 - PUT **http://localhost:60000/api/admin/products/680**
 ```javascript
