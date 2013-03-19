@@ -30,6 +30,10 @@ It aims to demonstrate how to handle:
 - Visual Studio 2012
 - SqlServer Express 2012 
 
+##Acknowledgements##
+A big thanks to OJ, Karl, Gerrod and Michael for all their help in getting this put together. 
+Whether it be through code contribution or advice.
+
 ##Getting Started:##
 
 ###Database###
