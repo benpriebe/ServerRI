@@ -30,6 +30,10 @@ It aims to demonstrate how to handle:
 - Visual Studio 2012
 - SqlServer Express 2012 
 
+##Acknowledgements##
+A big thanks to Gerrod, Karl, OJ and Michael for all their help in getting this put together. 
+Whether it be through code contribution or advice.
+
 ##Getting Started:##
 
 ###Database###
@@ -45,17 +49,17 @@ Once you've completed these steps, you should be able to run the unit test proje
 
 (hey! 3 acronyms in a row - sweet)
 
-- GET **http://localhost:60000/admin/products/680**
-- GET **http://localhost:60000/admin/products/**
-- GET **http://localhost:60000/admin/products?&top=5&skip=5**
-- GET **http://localhost:60000/admin/products?&top=5&skip=5&productname=LL%20Road%20Frame**
-- GET **http://localhost:60000/admin/products/1** (throws a 404)
+- GET **http://localhost:60000/api/products/680**
+- GET **http://localhost:60000/api/products/**
+- GET **http://localhost:60000/api/products?&top=5&skip=5**
+- GET **http://localhost:60000/api/products?&top=5&skip=5&productname=LL%20Road%20Frame**
+- GET **http://localhost:60000/api/products/1** (throws a 404)
 
-- GET **http://localhost:60000/admin/products?&top=5&skip=5&productname=error** (throws an exception)
+- GET **http://localhost:60000/api/products?&top=5&skip=5&productname=error** (throws an exception)
 
 **note:** you can view the exception details at **http://localhost:60000/elmah.axd** and you should also receive an email if you configured your Log4Net SMTPAppender correctly.
 
-- POST **http://localhost:60000/admin/products**
+- POST **http://localhost:60000/api/admin/products**
 ```javascript
 {
  name : "iPhone7",
@@ -63,8 +67,9 @@ Once you've completed these steps, you should be able to run the unit test proje
  listPrice : 799.00,
  standardCost: 384.23
 }
+```
 
-- POST **http://localhost:60000/admin/products** (invalid payload)
+- POST **http://localhost:60000/api/admin/products** (invalid payload)
 ```javascript
 {
  listPrice : 799.00,
@@ -72,7 +77,30 @@ Once you've completed these steps, you should be able to run the unit test proje
 }
 ```
 
-- PUT **http://localhost:60000/admin/products/680**
+- POST **http://localhost:60000/api/admin/products** (simple model validation failure)
+
+**note:** pass in a "accept-language: en-au" request header to get back a localized error message.
+
+```javascript
+{
+ name : "iPhone7",
+ productNumber : "1",
+ listPrice : 799.00,
+ standardCost: 384.23
+}
+```
+
+- POST **http://localhost:60000/api/admin/products** (model validation failure that goes off to the db)
+```javascript
+{
+ name : "iPhone7",
+ productNumber : "HL-U509",
+ listPrice : 99.00,
+ standardCost: 99
+}
+```
+
+- PUT **http://localhost:60000/api/admin/products/680**
 ```javascript
 {
   standardCost : 100.00,
@@ -80,7 +108,7 @@ Once you've completed these steps, you should be able to run the unit test proje
 }
 ```
 
-- PUT **http://localhost:60000/admin/products/1** (invalid product id)
+- PUT **http://localhost:60000/api/admin/products/1** (invalid product id)
 ```javascript
 {
   standardCost : 100.00,
@@ -88,8 +116,8 @@ Once you've completed these steps, you should be able to run the unit test proje
 }
 ```
 
-- PUT **http://localhost:60000/admin/products/680/mark-sold-out**
-- PUT **http://localhost:60000/admin/products/1/mark-sold-out** (invalid product id)
+- PUT **http://localhost:60000/api/admin/products/680/mark-sold-out**
+- PUT **http://localhost:60000/api/admin/products/1/mark-sold-out** (invalid product id)
 
-- DELETE **http://localhost:60000/admin/products/680**
-- DELETE **http://localhost:60000/admin/products/1** (invalid product id)
+- DELETE **http://localhost:60000/api/admin/products/680**
+- DELETE **http://localhost:60000/api/admin/products/1** (invalid product id)
