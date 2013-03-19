@@ -1,6 +1,8 @@
 ﻿#region Using directives
 
 using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using AutoMapper;
 using Contracts.Data;
 using Core;
@@ -36,6 +38,17 @@ namespace Services
         public OperationContext Context
         {
             get { return _context; }
+        }
+
+        public List<ValidationResult> Validate(params object[] models)
+        {
+            List<ValidationResult> validationResults = new List<ValidationResult>();
+            foreach (var model in models)
+            {
+                var vc = new ValidationContext(model, null, null);
+                Validator.TryValidateObject(model, vc, validationResults);
+            }
+            return validationResults;
         }
     }
 }
