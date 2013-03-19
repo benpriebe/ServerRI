@@ -45,6 +45,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{298FD8
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api.Client", "Api.Client\Api.Client.csproj", "{62666C5F-B13D-4449-BF83-309D9E21EE03}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = ServerRI1.vsmdi
@@ -106,6 +108,10 @@ Global
 		{027A3FAE-A424-40D6-B778-3F2DECFD02E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{027A3FAE-A424-40D6-B778-3F2DECFD02E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{027A3FAE-A424-40D6-B778-3F2DECFD02E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62666C5F-B13D-4449-BF83-309D9E21EE03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62666C5F-B13D-4449-BF83-309D9E21EE03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62666C5F-B13D-4449-BF83-309D9E21EE03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62666C5F-B13D-4449-BF83-309D9E21EE03}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -117,5 +123,6 @@ Global
 		{49A96367-40C1-49BE-959B-D50DC28391B8} = {37D95095-0A96-4B4D-8455-7C24B4AF1E46}
 		{E44F1219-0701-4A18-BA27-DB4B9B863F6F} = {CBF5D49A-7250-42D4-BD20-235DFF383265}
 		{24F46A7A-ADF1-4A7E-9D1C-3B2021E38AB0} = {CBF5D49A-7250-42D4-BD20-235DFF383265}
+		{62666C5F-B13D-4449-BF83-309D9E21EE03} = {CBF5D49A-7250-42D4-BD20-235DFF383265}
 	EndGlobalSection
 EndGlobal
