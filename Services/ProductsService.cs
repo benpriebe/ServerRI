@@ -31,17 +31,6 @@ namespace Services
             _externalProvider = externalProvider;
         }
 
-        public List<ValidationResult> Validate(params object[] models)
-        {
-            List<ValidationResult> validationResults = new List<ValidationResult>();
-            foreach (var model in models)
-            {
-                var vc = new ValidationContext(model, null, null);
-                Validator.TryValidateObject(model, vc, validationResults);
-            }
-            return validationResults;
-        }
-
         public Result<int?> AddProduct(ProductModelCreateRequest product)
         {
             _log.Enter(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with product {0}", product.ToJson()));
