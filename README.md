@@ -31,7 +31,7 @@ It aims to demonstrate how to handle:
 - SqlServer Express 2012 
 
 ##Acknowledgements##
-A big thanks to OJ, Karl, Gerrod and Michael for all their help in getting this put together. 
+A big thanks to Gerrod, Karl, OJ and Michael for all their help in getting this put together. 
 Whether it be through code contribution or advice.
 
 ##Getting Started:##
