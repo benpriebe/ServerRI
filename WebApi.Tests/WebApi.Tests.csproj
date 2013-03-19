@@ -104,6 +104,7 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Controllers\ProductsControllerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -114,14 +115,20 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <ProjectReference Include="..\WebApi\WebApi.csproj">
-      <Project>{3B96BD84-D246-4E85-BF32-6FA935AFEC7C}</Project>
-      <Name>WebApi</Name>
+    <ProjectReference Include="..\Api.Client\Api.Client.csproj">
+      <Project>{62666c5f-b13d-4449-bf83-309d9e21ee03}</Project>
+      <Name>Api.Client</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Controllers\" />
+    <ProjectReference Include="..\Api.Common\Api.Common.csproj">
+      <Project>{24f46a7a-adf1-4a7e-9d1c-3b2021e38ab0}</Project>
+      <Name>Api.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Models\Models.csproj">
+      <Project>{8a144065-3bc4-4b4c-a83a-d7f57a54ab88}</Project>
+      <Name>Models</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
