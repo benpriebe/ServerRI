@@ -8,7 +8,7 @@ using Data.Entities;
 #endregion
 
 
-namespace Providers
+namespace Providers.Data
 {
     public class UnitOfWork : IUnitOfWork
     {

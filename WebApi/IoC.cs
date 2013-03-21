@@ -14,6 +14,7 @@ using Core.IoCModules;
 using Data;
 using Data.Entities;
 using Providers;
+using Providers.Data;
 using Providers.External;
 using Services;
 

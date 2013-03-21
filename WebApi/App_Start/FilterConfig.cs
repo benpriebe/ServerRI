@@ -41,7 +41,7 @@ namespace WebApi
             public override void OnException(HttpActionExecutedContext actionExecutedContext)
             {
                 if (actionExecutedContext.Exception != null)
-                    _log.Exception(GetType(), MethodBase.GetCurrentMethod(), _context, actionExecutedContext.Exception);
+                    _log.Exception(m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), _context), actionExecutedContext.Exception);
 
                 base.OnException(actionExecutedContext);
             }

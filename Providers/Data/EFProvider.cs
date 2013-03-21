@@ -14,7 +14,7 @@ using Core.Extensions;
 #endregion
 
 
-namespace Providers
+namespace Providers.Data
 {
     /// <summary>
     /// The EF-dependent, generic provider for data access
@@ -46,68 +46,76 @@ namespace Providers
 
         public virtual IQueryable<T> GetAll()
         {
-            _log.Enter(GetType(), MethodBase.GetCurrentMethod(), Context);
-            return DbSet;
+            using (new OperationLogger(_log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context)))
+            {
+                return DbSet;
+            }
         }
 
         public virtual T GetById(int id)
         {
-            _log.Enter(GetType(), MethodBase.GetCurrentMethod(), Context);
-            return DbSet.Find(id);
+            using (new OperationLogger(_log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with id {0}", id))))
+            {
+                return DbSet.Find(id);
+            }
         }
 
         public virtual void Add(T entity)
         {
-            _log.Enter(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with entity {0} - {1}", typeof(T).Name, entity.ToJson()));
-            DbEntityEntry dbEntityEntry = DbContext.Entry(entity);
-            if (dbEntityEntry.State != EntityState.Detached)
+            using (new OperationLogger(_log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with entity {0} - {1}", typeof(T).Name, entity.ToJson()))))
             {
-                dbEntityEntry.State = EntityState.Added;
+                DbEntityEntry dbEntityEntry = DbContext.Entry(entity);
+                if (dbEntityEntry.State != EntityState.Detached)
+                {
+                    dbEntityEntry.State = EntityState.Added;
+                }
+                else
+                {
+                    DbSet.Add(entity);
+                }
             }
-            else
-            {
-                DbSet.Add(entity);
-            }
-            _log.Exit(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with entity {0} - {1}", typeof(T).Name, entity.ToJson()));
         }
 
         public virtual void Update(T entity)
         {
-            _log.Enter(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with entity {0} - {1}", typeof(T).Name, entity.ToJson()));
-            DbEntityEntry dbEntityEntry = DbContext.Entry(entity);
-            if (dbEntityEntry.State == EntityState.Detached)
+            using (new OperationLogger(_log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with entity {0} - {1}", typeof(T).Name, entity.ToJson()))))
             {
-                DbSet.Attach(entity);
+                DbEntityEntry dbEntityEntry = DbContext.Entry(entity);
+                if (dbEntityEntry.State == EntityState.Detached)
+                {
+                    DbSet.Attach(entity);
+                }
+                dbEntityEntry.State = EntityState.Modified;
             }
-            dbEntityEntry.State = EntityState.Modified;
-            _log.Exit(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with entity {0} - {1}", typeof(T).Name, entity.ToJson()));
         }
 
         public virtual void Delete(T entity)
         {
-            _log.Enter(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with entity {0} - {1}", typeof(T).Name, entity.ToJson()));
-            DbEntityEntry dbEntityEntry = DbContext.Entry(entity);
-            if (dbEntityEntry.State != EntityState.Deleted)
+            using (new OperationLogger(_log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with entity {0} - {1}", typeof(T).Name, entity.ToJson()))))
             {
-                dbEntityEntry.State = EntityState.Deleted;
+                DbEntityEntry dbEntityEntry = DbContext.Entry(entity);
+                if (dbEntityEntry.State != EntityState.Deleted)
+                {
+                    dbEntityEntry.State = EntityState.Deleted;
+                }
+                else
+                {
+                    DbSet.Attach(entity);
+                    DbSet.Remove(entity);
+                }
             }
-            else
-            {
-                DbSet.Attach(entity);
-                DbSet.Remove(entity);
-            }
-            _log.Exit(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with entity {0} - {1}", typeof(T).Name, entity.ToJson()));
         }
 
         public virtual void Delete(int id)
         {
-            _log.Enter(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with id {0}", id));
-            var entity = GetById(id);
-            if (entity == null)
-                throw new NotFoundProviderException(String.Format("Entity not found - {0} - {1}", typeof(T).Name, id));
+            using (new OperationLogger(_log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with id {0}", id))))
+            {
+                var entity = GetById(id);
+                if (entity == null)
+                    throw new NotFoundProviderException(String.Format("Entity not found - {0} - {1}", typeof(T).Name, id));
 
-            Delete(entity);
-            _log.Exit(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with id {0}", id));
+                Delete(entity);
+            }
         }
     }
 }

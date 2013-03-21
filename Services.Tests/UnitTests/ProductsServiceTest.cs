@@ -2,6 +2,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
+using System.Diagnostics;
 using System.Linq;
 using Api.Common;
 using Autofac;
@@ -34,7 +36,9 @@ namespace Services.Tests.UnitTests
             var builder = new ContainerBuilder();
             _mockProvider = new Mock<IProductsProvider>();
 
+            builder.RegisterInstance(new Mock<DbContext>().Object);
             builder.RegisterInstance(_mockProvider.Object);
+            builder.RegisterInstance(new Mock<IProvider<Customer>>().Object);
             builder.Update(IoC.Container);
 
             var scope = IoC.Container.BeginLifetimeScope();

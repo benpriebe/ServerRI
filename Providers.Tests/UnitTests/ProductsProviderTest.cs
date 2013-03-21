@@ -18,6 +18,7 @@ namespace Providers.Tests.UnitTests
     public class ProductsProviderTest
     {
         [TestMethod]
+        [TestCategory("Database")]
         public void AddProduct_BareBones()
         {
             using (new TransactionScope())
@@ -44,6 +45,7 @@ namespace Providers.Tests.UnitTests
         }
 
         [TestMethod]
+        [TestCategory("Database")]
         public void AddProduct_ViolatesSqlConstraints()
         {
             using (new TransactionScope())
@@ -72,18 +74,21 @@ namespace Providers.Tests.UnitTests
         }
 
         [TestMethod]
+        [TestCategory("Database")]
         public void UpdateProduct_Success()
         {
             throw new NotImplementedException("Left as an excercise for the reader");
         }
 
         [TestMethod]
+        [TestCategory("Database")]
         public void UpdateProduct_Failure()
         {
             throw new NotImplementedException("Left as an excercise for the reader");
         }
 
         [TestMethod]
+        [TestCategory("Database")]
         public void GetProductById_ValidProductID()
         {
             using (var uow = IoC.Container.Resolve<IUnitOfWork>())
@@ -97,6 +102,7 @@ namespace Providers.Tests.UnitTests
         }
 
         [TestMethod]
+        [TestCategory("Database")]
         public void GetProductDetailsById_ValidProductID()
         {
             using (var uow = IoC.Container.Resolve<IUnitOfWork>())
@@ -115,6 +121,7 @@ namespace Providers.Tests.UnitTests
         }
 
         [TestMethod]
+        [TestCategory("Database")]
         public void GetProductById_InvalidProductID()
         {
             using (var uow = IoC.Container.Resolve<IUnitOfWork>())
@@ -125,12 +132,14 @@ namespace Providers.Tests.UnitTests
         }
 
         [TestMethod]
+        [TestCategory("Database")]
         public void GetProducts_Filtered()
         {
             throw new NotImplementedException("Left as an excercise for the reader");
         }
 
         [TestMethod]
+        [TestCategory("Database")]
         public void GetAll_WithResults()
         {
             using (var uow = IoC.Container.Resolve<IUnitOfWork>())
@@ -144,6 +153,7 @@ namespace Providers.Tests.UnitTests
         }
 
         [TestMethod]
+        [TestCategory("Database")]
         public void GetProductsWithDetails_WithResults()
         {
             using (var uow = IoC.Container.Resolve<IUnitOfWork>())
@@ -157,6 +167,7 @@ namespace Providers.Tests.UnitTests
         }
 
         [TestMethod]
+        [TestCategory("Database")]
         public void DeleteProduct_ValidProductId()
         {
             using (new TransactionScope())
@@ -191,6 +202,7 @@ namespace Providers.Tests.UnitTests
         }
 
         [TestMethod]
+        [TestCategory("Database")]
         public void DeleteProduct_InvalidProductId()
         {
             using (var uow = IoC.Container.Resolve<IUnitOfWork>())

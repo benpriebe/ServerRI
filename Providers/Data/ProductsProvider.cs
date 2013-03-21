@@ -12,7 +12,7 @@ using Data.Entities;
 #endregion
 
 
-namespace Providers
+namespace Providers.Data
 {
     public class ProductsProvider : EFProvider<Product>, IProductsProvider
     {
@@ -25,16 +25,17 @@ namespace Providers
 
         public IQueryable<Product> GetProductsWithDetails()
         {
-            _log.Enter(GetType(), MethodBase.GetCurrentMethod(), Context);
+            using (new OperationLogger(_log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context)))
+            {
 
-            var products = DbContext
-                .Set<Product>()
-                .Include(p => p.ProductType)
-                .Include(p => p.ProductCategory)
-                .AsNoTracking();
-
-            _log.Exit(GetType(), MethodBase.GetCurrentMethod(), Context);
-            return products;
+                var products = DbContext
+                    .Set<Product>()
+                    .Include(p => p.ProductType)
+                    .Include(p => p.ProductCategory)
+                    .AsNoTracking();
+             
+                return products;
+            }
         }
     }
 }

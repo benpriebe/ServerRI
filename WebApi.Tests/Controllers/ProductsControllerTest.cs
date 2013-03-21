@@ -55,7 +55,7 @@ namespace WebApi.Tests.Controllers
 
             var proxy = new Proxy(new Uri("http://localhost:60000/"));
 
-            var x = proxy.Get<IList<ProductModel>>(null);
+            var x = proxy.Get<IList<ProductModel>>(new Uri("http://localhost:60000/api/products/"));
 
             Assert.IsTrue(x.Success);
             Assert.IsTrue(x.Value.Any());

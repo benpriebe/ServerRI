@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Linq;
 
 #endregion
@@ -124,7 +125,8 @@ namespace Api.Common
 
         public static Result<T> CreateValidationErrors(params ValidationResult[] errors)
         {
-            return Create(errors.ToList().Select((vr) => new Message(MessageLevel.Error, (int) MessageCodes.ValidationError, vr.ErrorMessage, vr.MemberNames.ToArray())));
+            var messages = errors.ToList().Select((vr) => new Message(MessageLevel.Error, (int) MessageCodes.ValidationError, vr.ErrorMessage, vr.MemberNames.ToArray()));
+            return Create(messages);
         }
 
         public static Result<T> Create(T value)

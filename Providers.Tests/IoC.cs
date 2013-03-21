@@ -9,6 +9,7 @@ using Core;
 using Core.IoCModules;
 using Data;
 using Data.Entities;
+using Providers.Data;
 using Providers.External;
 
 #endregion

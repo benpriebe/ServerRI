@@ -26,3 +26,4 @@ using log4net.Config;
 
 [assembly: Guid("a2194c8c-8b18-4e06-b12c-4d710d2423f4")]
 [assembly: XmlConfigurator(ConfigFile = "Log4Net.config", Watch = true)]
+

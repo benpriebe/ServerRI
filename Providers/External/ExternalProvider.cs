@@ -26,13 +26,20 @@ namespace Providers.External
 
         public IList<Widget> GetWidgets()
         {
-            _log.Enter(GetType(), MethodBase.GetCurrentMethod(), _context);
-            _log.Exit(GetType(), MethodBase.GetCurrentMethod(), _context);
-            return new[]
+            using (new OperationLogger(_log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), _context)))
             {
-                new Widget { Name = "Widget 1" },
-                new Widget { Name = "Widget 2" }
-            };
+                return new[]
+                {
+                    new Widget
+                    {
+                        Name = "Widget 1"
+                    },
+                    new Widget
+                    {
+                        Name = "Widget 2"
+                    }
+                };
+            }
         }
     }
 }

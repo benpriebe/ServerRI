@@ -20,6 +20,7 @@ namespace Services.Tests.E2ETests
         protected ProductsService _service = IoC.Container.Resolve<ProductsService>();
 
         [TestMethod]
+        [TestCategory("Database")]
         public void AddProduct_BareBones()
         {
             //Arrange
@@ -50,6 +51,7 @@ namespace Services.Tests.E2ETests
         }
 
         [TestMethod]
+        [TestCategory("Database")]
         public void AddProduct_ModelValidationFails()
         {
             //Arrange 
@@ -75,6 +77,7 @@ namespace Services.Tests.E2ETests
         }
 
         [TestMethod]
+        [TestCategory("Database")]
         public void AddProduct_ValidationFailsDatabaseLookup()
         {
             //Arrange 
@@ -100,18 +103,21 @@ namespace Services.Tests.E2ETests
         }
 
         [TestMethod]
+        [TestCategory("Database")]
         public void UpdateProduct_Success()
         {
             throw new NotImplementedException("Left as an excercise for the reader");
         }
 
         [TestMethod]
+        [TestCategory("Database")]
         public void UpdateProduct_Failure()
         {
             throw new NotImplementedException("Left as an excercise for the reader");
         }
 
         [TestMethod]
+        [TestCategory("Database")]
         public void GetProductById_ValidProductID()
         {
             //Act
@@ -126,6 +132,7 @@ namespace Services.Tests.E2ETests
         }
 
         [TestMethod]
+        [TestCategory("Database")]
         public void GetProductById_InvalidProductID()
         {
             //Act
@@ -139,12 +146,14 @@ namespace Services.Tests.E2ETests
         }
 
         [TestMethod]
+        [TestCategory("Database")]
         public void GetProducts_Filtered()
         {
             throw new NotImplementedException("Left as an excercise for the reader.");
         }
 
         [TestMethod]
+        [TestCategory("Database")]
         public void GetProducts_WithResults()
         {
             //Act
@@ -157,6 +166,7 @@ namespace Services.Tests.E2ETests
         }
 
         [TestMethod]
+        [TestCategory("Database")]
         public void GetProductsWithDetails_WithResults()
         {
             //Act
@@ -173,6 +183,7 @@ namespace Services.Tests.E2ETests
 
 
         [TestMethod]
+        [TestCategory("Database")]
         public void DeleteProduct_ValidProductId()
         {
             //Arrange
@@ -202,6 +213,7 @@ namespace Services.Tests.E2ETests
         }
 
         [TestMethod]
+        [TestCategory("Database")]
         public void DeleteProduct_InvalidProductId()
         {
             //Arrange

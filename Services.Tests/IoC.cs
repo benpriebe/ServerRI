@@ -10,6 +10,7 @@ using Core.IoCModules;
 using Data;
 using Data.Entities;
 using Providers;
+using Providers.Data;
 using Providers.External;
 
 #endregion
@@ -60,5 +61,6 @@ namespace Services.Tests
 
             Container = builder.Build();
         }
+
     }
 }
