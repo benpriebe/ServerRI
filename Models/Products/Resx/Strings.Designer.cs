@@ -61,20 +61,11 @@ namespace Models.Products.Resx {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Product Name.
-        /// </summary>
-        public static string ProductModel_DisplayAttribute_Name {
-            get {
-                return ResourceManager.GetString("ProductModel_DisplayAttribute_Name", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to ProNum.
         /// </summary>
-        public static string ProductModelCreateRequest_DisplayAttribute_ProductNumber {
+        public static string ProductModel_DisplayAttribute_ProductNumber {
             get {
-                return ResourceManager.GetString("ProductModelCreateRequest_DisplayAttribute_ProductNumber", resourceCulture);
+                return ResourceManager.GetString("ProductModel_DisplayAttribute_ProductNumber", resourceCulture);
             }
         }
         

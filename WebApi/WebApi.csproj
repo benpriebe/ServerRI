@@ -149,6 +149,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="IoC.cs" />
+    <Compile Include="LocalizationProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resx\ValidationErrors.Designer.cs">
       <DependentUpon>ValidationErrors.resx</DependentUpon>
