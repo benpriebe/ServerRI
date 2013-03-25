@@ -6,7 +6,7 @@ using Api.Client;
 using Api.Common;
 using Api.Common.Config;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Models.Administration.Products;
+using Models.Products;
 
 
 //TODO: 20-Mar-2013 - Ben - Work in Progress. Not for consumption.

@@ -46,17 +46,17 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Administration\FilterRequest.cs" />
-    <Compile Include="Administration\Products\ProductModelFilterRequest.cs" />
-    <Compile Include="Administration\Products\ProductModelUpdateRequest.cs" />
-    <Compile Include="Administration\Products\ProductModel.cs" />
-    <Compile Include="Administration\Products\ProductModelCreateRequest.cs" />
-    <Compile Include="Administration\Products\ProductModelResponse.cs" />
-    <Compile Include="Resx\LocalizedErrors.Designer.cs">
+    <Compile Include="FilterRequest.cs" />
+    <Compile Include="Products\Resx\Strings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>LocalizedErrors.resx</DependentUpon>
+      <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
+    <Compile Include="Products\ProductModelFilterRequest.cs" />
+    <Compile Include="Products\ProductModelUpdateRequest.cs" />
+    <Compile Include="Products\ProductModel.cs" />
+    <Compile Include="Products\ProductModelCreateRequest.cs" />
+    <Compile Include="Products\ProductModelResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -66,12 +66,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resx\LocalizedErrors.en-AU.resx" />
-    <EmbeddedResource Include="Resx\LocalizedErrors.resx">
+    <EmbeddedResource Include="Products\Resx\Strings.en-AU.resx" />
+    <EmbeddedResource Include="Products\Resx\Strings.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>LocalizedErrors.Designer.cs</LastGenOutput>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

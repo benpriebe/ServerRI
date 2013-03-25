@@ -2,7 +2,7 @@
 
 using AutoMapper;
 using Data.Entities;
-using Models.Administration.Products;
+using Models.Products;
 
 #endregion
 

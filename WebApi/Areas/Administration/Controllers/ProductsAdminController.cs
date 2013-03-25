@@ -7,7 +7,7 @@ using Api.Web.Extensions;
 using Autofac.Integration.WebApi;
 using Common.Logging;
 using Core;
-using Models.Administration.Products;
+using Models.Products;
 using Services;
 using WebApi.Controllers;
 

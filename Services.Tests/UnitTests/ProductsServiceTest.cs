@@ -3,17 +3,16 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
-using System.Diagnostics;
 using System.Linq;
 using Api.Common;
 using Autofac;
 using Contracts.Data;
 using Data.Entities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Models.Administration.Products;
-using Models.Resx;
+using Models.Products;
 using Moq;
 using Providers;
+using Services.Resx;
 
 #endregion
 
@@ -38,7 +37,6 @@ namespace Services.Tests.UnitTests
 
             builder.RegisterInstance(new Mock<DbContext>().Object);
             builder.RegisterInstance(_mockProvider.Object);
-            builder.RegisterInstance(new Mock<IProvider<Customer>>().Object);
             builder.Update(IoC.Container);
 
             var scope = IoC.Container.BeginLifetimeScope();
@@ -91,7 +89,7 @@ namespace Services.Tests.UnitTests
             Assert.IsTrue(result.Failure);
             Assert.IsTrue(result.Messages.Any());
             Assert.IsTrue(result.Messages.Any(m => m.Code == (int)MessageCodes.ValidationError));
-            Assert.IsTrue(result.Messages.Any(m => String.Format(LocalizedErrors.ProductModelCreateRequest_ErrorCode_1, productModel.StandardCost, productModel.ProductNumber) == m.Phrase));
+            Assert.IsTrue(result.Messages.Any(m => String.Format(Models.Products.Resx.Strings.ProductModelCreateRequest_ValidationError_1, productModel.StandardCost, productModel.ProductNumber) == m.Phrase));
         }
 
         [TestMethod]
@@ -115,7 +113,7 @@ namespace Services.Tests.UnitTests
             Assert.IsTrue(result.Failure);
             Assert.IsTrue(result.Messages.Any());
             Assert.IsTrue(result.Messages.Any(m => m.Code == (int)MessageCodes.ValidationError));
-            Assert.IsTrue(result.Messages.Any(m => String.Format(LocalizedErrors.ProductsService_AddProduct_ErrorCode1, productModel.ProductNumber) == m.Phrase));
+            Assert.IsTrue(result.Messages.Any(m => String.Format(Strings.ProductsService_AddProduct_ValidationError_1, productModel.ProductNumber) == m.Phrase));
         }
 
 

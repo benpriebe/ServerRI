@@ -6,8 +6,8 @@ using System.Transactions;
 using Api.Common;
 using Autofac;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Models.Administration.Products;
-using Models.Resx;
+using Models.Products;
+using Models.Products.Resx;
 
 #endregion
 
@@ -35,9 +35,11 @@ namespace Services.Tests.E2ETests
             using (new TransactionScope())
             {
                 //Act
-                _service.AddProduct(product);
+                Result<int?> added = _service.AddProduct(product);
 
                 //Assert
+                Assert.IsTrue(added.Success);
+                
                 var result = _service.GetProductById(product.Id);
 
                 Assert.IsTrue(result.Success);
@@ -72,7 +74,7 @@ namespace Services.Tests.E2ETests
                 Assert.IsTrue(result.Failure);
                 Assert.IsTrue(result.Messages.Any());
                 Assert.IsTrue(result.Messages.Any(m => m.Code == (int) MessageCodes.ValidationError));
-                Assert.IsTrue(result.Messages.Any(m => String.Format(LocalizedErrors.ProductModelCreateRequest_ErrorCode_1, productModel.StandardCost, productModel.ProductNumber) == m.Phrase));
+                Assert.IsTrue(result.Messages.Any(m => String.Format(Strings.ProductModelCreateRequest_ValidationError_1, productModel.StandardCost, productModel.ProductNumber) == m.Phrase));
             }
         }
 
@@ -98,7 +100,7 @@ namespace Services.Tests.E2ETests
                 Assert.IsTrue(result.Failure);
                 Assert.IsTrue(result.Messages.Any());
                 Assert.IsTrue(result.Messages.Any(m => m.Code == (int) MessageCodes.ValidationError));
-                Assert.IsTrue(result.Messages.Any(m => String.Format(LocalizedErrors.ProductsService_AddProduct_ErrorCode1, productModel.ProductNumber) == m.Phrase));
+                Assert.IsTrue(result.Messages.Any(m => String.Format(Resx.Strings.ProductsService_AddProduct_ValidationError_1, productModel.ProductNumber) == m.Phrase));
             }
         }
 

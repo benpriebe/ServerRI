@@ -1,5 +1,7 @@
 ﻿#region Using directives
 
+using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Web.Http;
 using System.Web.Http.Filters;
@@ -9,6 +11,7 @@ using Common.Logging;
 using Core;
 using Core.Extensions;
 using Elmah.Contrib.WebApi;
+using ActionFilterAttribute = System.Web.Http.Filters.ActionFilterAttribute;
 
 #endregion
 

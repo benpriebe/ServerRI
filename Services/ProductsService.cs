@@ -12,9 +12,9 @@ using Contracts.Data;
 using Core;
 using Core.Extensions;
 using Data.Entities;
-using Models.Administration.Products;
-using Models.Resx;
+using Models.Products;
 using Providers;
+using Services.Resx;
 
 #endregion
 
@@ -23,12 +23,10 @@ namespace Services
 {
     public class ProductsService : BaseService
     {
-        private readonly ILog _log;
         private readonly IExternalProvider _externalProvider;
 
-        public ProductsService(OperationContext context, ILog log, Func<IUnitOfWork> uow, IExternalProvider externalProvider) : base(context, uow)
+        public ProductsService(OperationContext context, ILog log, Func<IUnitOfWork> uow, IExternalProvider externalProvider) : base(context, log, uow)
         {
-            _log = log;
             _externalProvider = externalProvider;
         }
 
@@ -37,7 +35,7 @@ namespace Services
             var watch = new Stopwatch();
             watch.Start();
 
-            using (new OperationLogger(_log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with product {0}", product.ToJson()))))
+            using (new OperationLogger(Log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with product {0}", product.ToJson()))))
             {
                 Console.Out.WriteLine("A - " + watch.ElapsedMilliseconds);
 
@@ -68,8 +66,7 @@ namespace Services
                         if (uow.Products.GetAll().Any(p => p.ProductNumber == product.ProductNumber))
                         {
                             Console.Out.WriteLine("E - " + watch.ElapsedMilliseconds);
-                            //TODO: 19-Mar-2013 - Ben - Structure resx files appropriately. This is for demonstration but wrong. Shouldn't depend on the Model class for this message.
-                            return Result<int?>.CreateValidationErrors(new ValidationResult(String.Format(LocalizedErrors.ProductsService_AddProduct_ErrorCode1, product.ProductNumber), new[]
+                            return Result<int?>.CreateValidationErrors(new ValidationResult(String.Format(Strings.ProductsService_AddProduct_ValidationError_1, product.ProductNumber), new[]
                             {
                                 "ProductNumber"
                             }));
@@ -82,7 +79,7 @@ namespace Services
 
                         Console.Out.WriteLine("G - " + watch.ElapsedMilliseconds);
 
-                        _log.Info(m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format(" product added - id = {0}", entity.ProductID)));
+                        Log.Info(m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format(" product added - id = {0}", entity.ProductID)));
 
                         Console.Out.WriteLine("H - " + watch.ElapsedMilliseconds);
                     }
@@ -90,7 +87,7 @@ namespace Services
                 catch (ProviderException e)
                 {
                     Console.Out.WriteLine("I - " + watch.ElapsedMilliseconds);
-                    _log.Exception(m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context, e.Errors.ToJson()), e);
+                    Log.Exception(m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context, e.Errors.ToJson()), e);
                     Console.Out.WriteLine("J - " + watch.ElapsedMilliseconds);
                     return ResultExtensions.Create<int?>(e, (int) ServiceMessages.Codes.ProviderError);
                 }
@@ -115,7 +112,7 @@ namespace Services
             var watch = new Stopwatch();
             watch.Start();
 
-            using (new OperationLogger(_log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with product {0}", product.ToJson()))))
+            using (new OperationLogger(Log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with product {0}", product.ToJson()))))
             {
                 Console.Out.WriteLine("A - " + watch.ElapsedMilliseconds);
 
@@ -147,7 +144,7 @@ namespace Services
 
                         Console.Out.WriteLine("E - " + watch.ElapsedMilliseconds);
 
-                        _log.Info(m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format(" product updated - id = {0}", entity.ProductID)));
+                        Log.Info(m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format(" product updated - id = {0}", entity.ProductID)));
 
                         Console.Out.WriteLine("F - " + watch.ElapsedMilliseconds);
                     }
@@ -155,7 +152,7 @@ namespace Services
                 catch (ProviderException e)
                 {
                     Console.Out.WriteLine("G - " + watch.ElapsedMilliseconds);
-                    _log.Exception(m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context, e.Errors.ToJson()), e);
+                    Log.Exception(m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context, e.Errors.ToJson()), e);
                     Console.Out.WriteLine("H - " + watch.ElapsedMilliseconds);
                     return ResultExtensions.Create(e, (int) ServiceMessages.Codes.ProviderError);
                 }
@@ -170,7 +167,7 @@ namespace Services
 
         public Result DeleteProduct(int productId)
         {
-            using (new OperationLogger(_log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with productId {0}", productId))))
+            using (new OperationLogger(Log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with productId {0}", productId))))
             {
                 using (var uow = UoW())
                 {
@@ -191,7 +188,7 @@ namespace Services
 
         public Result<ProductModelResponse> GetProductById(int productId)
         {
-            using (new OperationLogger(_log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with productId {0}", productId))))
+            using (new OperationLogger(Log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with productId {0}", productId))))
             {
                 using (var uow = UoW())
                 {
@@ -212,7 +209,7 @@ namespace Services
 
         public Result<IList<ProductModel>> GetProducts(ProductModelFilterRequest filter)
         {
-            using (new OperationLogger(_log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context)))
+            using (new OperationLogger(Log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context)))
             {
                 using (var uow = UoW())
                 {
@@ -233,7 +230,7 @@ namespace Services
 
         public Result<IList<ProductModelResponse>> GetProductsWithDetails()
         {
-            using (new OperationLogger(_log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context)))
+            using (new OperationLogger(Log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context)))
             {
                 using (var uow = UoW())
                 {
