@@ -1,7 +1,7 @@
 #ServerRI#
 ========
 
-An fully working overly engineered server side webapi solution.
+An fully functional server side webapi solution.
 
 The architecture for this server side solution incorporates the following patterns and technologies:
 
@@ -59,7 +59,7 @@ Once you've completed these steps, you should be able to run the unit test proje
 
 **note:** you can view the exception details at **http://localhost:60000/elmah.axd** and you should also receive an email if you configured your Log4Net SMTPAppender correctly.
 
-- POST **http://localhost:60000/api/admin/products**
+- POST **http://localhost:60000/api/products**
 ```javascript
 {
  name : "iPhone7",
@@ -69,7 +69,7 @@ Once you've completed these steps, you should be able to run the unit test proje
 }
 ```
 
-- POST **http://localhost:60000/api/admin/products** (invalid payload)
+- POST **http://localhost:60000/api/products** (invalid payload)
 ```javascript
 {
  listPrice : 799.00,
@@ -77,7 +77,7 @@ Once you've completed these steps, you should be able to run the unit test proje
 }
 ```
 
-- POST **http://localhost:60000/api/admin/products** (simple model validation failure)
+- POST **http://localhost:60000/api/products** (simple model validation failure)
 
 **note:** pass in a "accept-language: en-au" request header to get back a localized error message.
 
@@ -90,7 +90,7 @@ Once you've completed these steps, you should be able to run the unit test proje
 }
 ```
 
-- POST **http://localhost:60000/api/admin/products** (model validation failure that goes off to the db)
+- POST **http://localhost:60000/api/products** (model validation failure that goes off to the db)
 ```javascript
 {
  name : "iPhone7",
@@ -100,7 +100,7 @@ Once you've completed these steps, you should be able to run the unit test proje
 }
 ```
 
-- PUT **http://localhost:60000/api/admin/products/680**
+- PUT **http://localhost:60000/api/products/680**
 ```javascript
 {
   standardCost : 100.00,
@@ -108,7 +108,7 @@ Once you've completed these steps, you should be able to run the unit test proje
 }
 ```
 
-- PUT **http://localhost:60000/api/admin/products/1** (invalid product id)
+- PUT **http://localhost:60000/api/products/1** (invalid product id)
 ```javascript
 {
   standardCost : 100.00,
@@ -116,8 +116,8 @@ Once you've completed these steps, you should be able to run the unit test proje
 }
 ```
 
-- PUT **http://localhost:60000/api/admin/products/680/mark-sold-out**
-- PUT **http://localhost:60000/api/admin/products/1/mark-sold-out** (invalid product id)
+- PUT **http://localhost:60000/api/products/680/mark-sold-out**
+- PUT **http://localhost:60000/api/products/1/mark-sold-out** (invalid product id)
 
-- DELETE **http://localhost:60000/api/admin/products/680**
-- DELETE **http://localhost:60000/api/admin/products/1** (invalid product id)
+- DELETE **http://localhost:60000/api/products/680**
+- DELETE **http://localhost:60000/api/products/1** (invalid product id)
