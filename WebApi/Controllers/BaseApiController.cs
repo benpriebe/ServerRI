@@ -1,6 +1,7 @@
 ﻿#region Using directives
 
 using System;
+using System.Linq;
 using System.Net.Http;
 using System.Transactions;
 using System.Web.Http;
@@ -14,7 +15,6 @@ namespace WebApi.Controllers
 {
     public class BaseApiController : ApiController
     {
-        private readonly bool _commit = true;
         private readonly OperationContext _context;
         private readonly ILog _log;
 
@@ -22,9 +22,7 @@ namespace WebApi.Controllers
         {
             _context = context;
             _log = log;
-#if DEBUG
-            _commit = false;
-#endif
+
         }
 
         public ILog Log
@@ -37,10 +35,17 @@ namespace WebApi.Controllers
             get { return _context; }
         }
 
-        public HttpResponseMessage Invoke(Func<HttpResponseMessage> func)
+        public HttpResponseMessage Invoke(HttpRequestMessage request, Func<HttpResponseMessage> func)
         {
             HttpResponseMessage response;
-            if (_commit)
+            bool commit = !request.Headers.Any(header => header.Key == "TransactionRollback" && header.Value.Any(val => bool.Parse(val)));
+
+            // this is a failsafe for when users forget to pass in the TrasactionRollback Http Header.
+#if DEBUG
+            commit = false;
+#endif
+
+            if (commit)
             {
                 response = func();
             }

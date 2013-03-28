@@ -41,6 +41,7 @@ namespace Services.Tests.UnitTests
 
             var scope = IoC.Container.BeginLifetimeScope();
             _service = scope.Resolve<ProductsService>();
+
         }
 
         [TestMethod]

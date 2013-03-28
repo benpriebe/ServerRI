@@ -59,19 +59,22 @@ namespace WebApi
                     if (attribute != null && attribute.ResourceType == null)
                     {
                         var resource = GetResource(containerType);
-                        var resourceKey = GetResourceKey(resource.ResourceManager, containerType, propertyName);
-                        if (!String.IsNullOrWhiteSpace(resourceKey))
+                        if (resource != null)
                         {
-                            attribute.Name = resourceKey;
-                            attribute.ResourceType = resource.ResourceType;
-                        }
-                        else
-                        {
-                            resourceKey = GetMasterResourceKey(propertyName);
+                            var resourceKey = GetResourceKey(resource.ResourceManager, containerType, propertyName);
                             if (!String.IsNullOrWhiteSpace(resourceKey))
                             {
                                 attribute.Name = resourceKey;
-                                attribute.ResourceType = _masterResourceType;
+                                attribute.ResourceType = resource.ResourceType;
+                            }
+                            else
+                            {
+                                resourceKey = GetMasterResourceKey(propertyName);
+                                if (!String.IsNullOrWhiteSpace(resourceKey))
+                                {
+                                    attribute.Name = resourceKey;
+                                    attribute.ResourceType = _masterResourceType;
+                                }
                             }
                         }
                     }
@@ -93,6 +96,9 @@ namespace WebApi
             
             var assembly = Assembly.GetAssembly(containerType);
             var resourceStrings = assembly.GetType(resxClassName);
+
+            if (resourceStrings == null)
+                return null;
 
             var pi = resourceStrings.GetProperty("ResourceManager", BindingFlags.Public | BindingFlags.Static);
             var rm = (ResourceManager) pi.GetMethod.Invoke(resourceStrings, null);

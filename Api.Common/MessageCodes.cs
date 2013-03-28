@@ -6,7 +6,9 @@
     /// </summary>
     public enum MessageCodes
     {
+        ValidationError = -1,
         NotFound = -404,
-        ValidationError = -1
+        UnexpectedResponseCode = -401,
+        UnexpectedApiRequestError = -402,
     }
 }

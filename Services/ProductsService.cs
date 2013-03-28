@@ -194,7 +194,6 @@ namespace Services
                 {
                     var entity = uow.Products.GetById(productId);
 
-
                     return entity == null
                         ? Result<ProductModelResponse>.CreateNotFound<Product>(productId)
                         : Result<ProductModelResponse>.Create(Mapper.Map<ProductModelResponse>(entity));

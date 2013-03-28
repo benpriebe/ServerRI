@@ -1,269 +1,648 @@
-﻿using System;
+﻿#region Using directives
+
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Formatting;
+using System.Net.Http.Headers;
+using System.Threading;
+using System.Threading.Tasks;
 using Api.Common;
-using Api.Common.Config;
+using Core.Extensions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
+
+#endregion
 
 namespace Api.Client
 {
-    public abstract class ClientProxy
+    public class ClientProxy
     {
-        protected readonly Link Link;
+        private readonly Action<HttpRequestMessage> _globalRequestMessageHandler;
+        private readonly Lazy<MediaTypeFormatter> _jsonFormatter;
+        private string _baseApiUri;
 
-        protected ClientProxy(Link link)
+        public ClientProxy(string baseApiUri, Action<HttpRequestMessage> globalRequestMessageHandler = null)
         {
-            Link = link;
-        }
+            _globalRequestMessageHandler = globalRequestMessageHandler;
+            BaseApiUri = baseApiUri;
 
-        protected ClientProxy(Endpoint endpoint, string linkId, params string[] methods)
-        {
-            Link = endpoint.Get(linkId);
-
-            if (Link == null)
-            {
-                throw new ArgumentException(string.Format("Endpoint doesn't contain expected link '{0}'.", linkId));
-            }
-
-            foreach (var method in methods)
-            {
-                if (!Link.Methods.Contains(method))
+            _jsonFormatter = new Lazy<MediaTypeFormatter>(
+                () =>
                 {
-                    throw new ArgumentException(string.Format("Endpoint link '{0}' does not support expected method '{1}'.", linkId, method));
-                }
-            }
-        }
-
-        protected Result<List<T>> GetList<T>(Func<Uri, Uri> uriCreator = null)
-        {
-            uriCreator = uriCreator ?? new Func<Uri, Uri>(x => x);
-
-            try
-            {
-                using (var client = new HttpClient())
-                {
-                    var response = client.GetAsync(uriCreator(Link.Uri)).Result;
-
-                    switch (response.StatusCode)
+                    var serializerSettings = new JsonSerializerSettings
                     {
-                        case HttpStatusCode.OK:
-                            {
-                                var result = response.Content.ReadAsAsync<List<T>>().Result;
-                                return Result<List<T>>.Create(result);
-                            }
-                        case HttpStatusCode.InternalServerError:
-                            {
-                                var result = response.Content.ReadAsAsync<List<Message>>().Result;
-                                return Result<List<T>>.Create(result);
-                            }
-                        default:
-                            {
-                                var message = new Message(MessageLevel.Error, 402, "Unexpected response accessing API: " + response.StatusCode, string.Empty);
-                                return Result<List<T>>.Create(message);
-                            }
+                        PreserveReferencesHandling = PreserveReferencesHandling.Objects, // note: resolves cyclic dependencies when serializing.
+                        ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                        TypeNameHandling = TypeNameHandling.Auto,
+                    };
+
+                    serializerSettings.Converters.Add(new StringEnumConverter());
+
+                    return new JsonMediaTypeFormatter
+                    {
+                        SerializerSettings = serializerSettings
+                    };
+                });
+        }
+
+        public string BaseApiUri
+        {
+            get { return _baseApiUri; }
+            private set
+            {
+                _baseApiUri = value; 
+                if (!value.EndsWith("/"))
+                    _baseApiUri += "/";
+            }
+        }
+
+        protected MediaTypeFormatter JsonFormatter
+        {
+            get { return _jsonFormatter.Value; }
+        }
+        
+        public Task<Result<T>> Get<T>(string relativeUri, IEnumerable<MediaTypeFormatter> formatters = null)
+        {
+            Func<HttpResponseMessage, Result<T>> responseHandler = response =>
+            {
+                switch (response.StatusCode)
+                {
+                    case HttpStatusCode.OK:
+                        {
+                            var result = response.Content.ReadAsAsync<T>().Result;
+                            return Result<T>.Create(result);
+                        }
+                    case HttpStatusCode.NotFound:
+                    case HttpStatusCode.BadRequest:
+                        {
+                            var result = response.Content.ReadAsAsync<List<Message>>(formatters ?? CreateDefaultFormatters()).Result;
+                            return Result<T>.Create(result);
+                        }
+                    default:
+                    {
+                        return Result<T>.Create(GetUnexpectedResponseStatusCodeMessage(response));
                     }
                 }
-            }
-            catch (Exception)
-            {
-                // TODO: should we not put some detail of the exception in here?
-                var message = new Message(MessageLevel.Error, 401, "Unexpected error accessing API.", string.Empty);
-                return Result<List<T>>.Create(message);
-            }
+            };
+            Func<Message, Result<T>> errorHandler = Result<T>.Create;
+            return Request(relativeUri, HttpMethod.Get, responseHandler, errorHandler);
         }
 
-        protected Result<T> Get<T>(Func<Uri, Uri> uriCreator = null)
+        public Task<Result<T>> Get<T>(object id, IEnumerable<MediaTypeFormatter> formatters = null)
         {
-            return Get<T>(string.Empty, uriCreator);
+            return Get<T>(id.ToString(), formatters);
         }
 
-        protected Result<T> Get<T>(string id, Func<Uri, Uri> uriCreator = null)
+        public Task<Result<List<T>>> GetList<T>(IEnumerable<MediaTypeFormatter> formatters = null)
         {
-            uriCreator = uriCreator ?? new Func<Uri, Uri>(x => x);
+            return Get<List<T>>(String.Empty);
+        }
 
-            try
-            {
-                using (var client = new HttpClient())
+        public Task<Result<List<T>>> GetList<T>(string relativeUri, IEnumerable<MediaTypeFormatter> formatters = null)
+        {
+            return Get<List<T>>(relativeUri);
+        }
+
+        public Task<Result<Uri>> PostWithUri<TRequestData>(TRequestData requestData)
+        {
+            return PostWithUri(String.Empty, requestData);
+        }
+        
+        public Task<Result<Uri>> PostWithUri<TRequestData>(string relativeUri, TRequestData requestData)
+        {
+            var returnVal = Post<TRequestData, object>(relativeUri, requestData)
+                .ContinueWith(t =>
                 {
-                    var initialUri = string.IsNullOrWhiteSpace(id) ? Link.Uri : new Uri(Link.Uri, id);
-                    var response = client.GetAsync(uriCreator(initialUri)).Result;
-
-                    switch (response.StatusCode)
+                    var result = t.Result;
+                    if (result.Failure)
                     {
-                        case HttpStatusCode.OK:
-                            {
-                                var result = response.Content.ReadAsAsync<T>().Result;
-                                return Result<T>.Create(result);
-                            }
-                        case HttpStatusCode.InternalServerError:
-                            {
-                                var result = response.Content.ReadAsAsync<List<Message>>().Result;
-                                return Result<T>.Create(result);
-                            }
-                        case HttpStatusCode.NotFound:
-                            {
-                                return Result<T>.CreateEmpty();
-                            }
-                        default:
-                            {
-                                var message = new Message(MessageLevel.Error, 402, "Unexpected response accessing API: " + response.StatusCode, string.Empty);
-                                return Result<T>.Create(message);
-                            }
+                        return Result<Uri>.Create(result.Messages);
+                    }
+                    return Result<Uri>.Create(result.Value.Item1); // the Uri
+
+                }, TaskContinuationOptions.ExecuteSynchronously);
+
+            return returnVal;
+        }
+
+        public Task<Result<TResult>> PostWithResult<TRequestData, TResult>(TRequestData requestData)
+        {
+            return PostWithResult<TRequestData, TResult>(String.Empty, requestData);
+        }
+
+        public Task<Result<TResult>> PostWithResult<TRequestData, TResult>(string relativeUri, TRequestData requestData)
+        {
+            var returnVal = Post<TRequestData, TResult>(relativeUri, requestData)
+                .ContinueWith(t =>
+                {
+                    var result = t.Result;
+                    if (result.Failure)
+                    {
+                        return Result<TResult>.Create(result.Messages);
+                    }
+                    return Result<TResult>.Create(result.Value.Item2); 
+
+                }, TaskContinuationOptions.ExecuteSynchronously);
+
+            return returnVal;
+        }
+
+        public Task<Result<Tuple<Uri, TResult>>> Post<TRequestData, TResult>(TRequestData requestData)
+        {
+            return Post<TRequestData, TResult>(String.Empty, requestData);
+        }
+
+        public Task<Result<Tuple<Uri, TResult>>> Post<TRequestData, TResult>(string relativeUri, TRequestData requestData)
+        {
+            Action<HttpRequestMessage> requestHandler = request => request.Content = new ObjectContent<TRequestData>(requestData, JsonFormatter);
+            Func<HttpResponseMessage, Result<Tuple<Uri, TResult>>> responseHandler = response =>
+            {
+
+                switch (response.StatusCode)
+                {
+                    case HttpStatusCode.NoContent:
+                    {
+                        return Result<Tuple<Uri, TResult>>.CreateEmpty();
+                    }
+                    case HttpStatusCode.OK:
+                    {
+                        var result = response.Content.ReadAsAsync<TResult>().Result;
+                        return Result<Tuple<Uri, TResult>>.Create(Tuple.Create<Uri, TResult>(null, result));
+                    }
+                    case HttpStatusCode.Created:
+                    {
+                        var locationUri = response.Headers.Location;
+                        if (response.Content.Headers.ContentLength.HasValue && response.Content.Headers.ContentLength.Value > 0)
+                        {
+                            var result = response.Content.ReadAsAsync<TResult>().Result;
+                            return Result<Tuple<Uri, TResult>>.Create(Tuple.Create(locationUri, result));
+                        }
+                        return Result<Tuple<Uri, TResult>>.Create(Tuple.Create(locationUri, default(TResult)));
+                    }
+                    case HttpStatusCode.NotFound:
+                    case HttpStatusCode.BadRequest:
+                    {
+                        var result = response.Content.ReadAsAsync<List<Message>>().Result;
+                        return Result<Tuple<Uri, TResult>>.Create(result);
+                    }
+                    default:
+                    {
+                        return Result<Tuple<Uri, TResult>>.Create(GetUnexpectedResponseStatusCodeMessage(response));
                     }
                 }
-            }
-            catch (Exception)
-            {
-                var message = new Message(MessageLevel.Error, 401, "Unexpected error accessing API.", string.Empty);
-                return Result<T>.Create(message);
-            }
+            };
+            
+            Func<Message, Result<Tuple<Uri, TResult>>> errorHandler = Result<Tuple<Uri, TResult>>.Create;
+            
+            return Request(relativeUri, HttpMethod.Post, responseHandler, errorHandler, requestHandler);
         }
 
-        protected Result<Uri> Post<T>(T body, Func<Uri, Uri> uriCreator = null)
+        public Task<Result> Put<TRequestData>(string relativeUri, TRequestData requestData)
         {
-            var result = Post<T, object>(body, uriCreator);
-            if (result.Failure)
+            Action<HttpRequestMessage> requestHandler = request => request.Content = new ObjectContent<TRequestData>(requestData, JsonFormatter);
+            Func<HttpResponseMessage, Result> responseHandler = response =>
             {
-                return Result<Uri>.Create(result.Messages);
-            }
-            return Result<Uri>.Create(result.Value.Item1);
+                 switch (response.StatusCode)
+                            {
+                                case HttpStatusCode.NoContent:
+                                case HttpStatusCode.OK:
+                                    {
+                                        return Result.CreateEmpty();
+                                    }
+                                 case HttpStatusCode.NotFound:           
+                                 case HttpStatusCode.BadRequest:
+                                    {
+                                        var result = response.Content.ReadAsAsync<List<Message>>().Result;
+                                        return Result.Create(result);
+                                    }
+                                default:
+                                    {
+                                        return Result.Create(GetUnexpectedResponseStatusCodeMessage(response));
+                                    }
+                            }
+            };
+            Func<Message, Result> errorHandler = Result.Create;
+            return Request(relativeUri, HttpMethod.Put, responseHandler, errorHandler, requestHandler);
         }
 
-        protected Result<Tuple<Uri, TResult>> Post<TContent, TResult>(TContent body, Func<Uri, Uri> uriCreator = null)
+        public Task<Result> Put<TRequestData>(object id, TRequestData requestData)
         {
-            uriCreator = uriCreator ?? new Func<Uri, Uri>(x => x);
+            return Put(id.ToString(), requestData);
+        }
 
+        public Task<Result> Delete(string relativeUri)
+        {
+            Func<HttpResponseMessage, Result> responseHandler = response =>
+            {
+                switch (response.StatusCode)
+                {
+                    case HttpStatusCode.NoContent:
+                    case HttpStatusCode.OK:
+                        {
+                            return Result.CreateEmpty();
+                        }
+                    case HttpStatusCode.NotFound:
+                    case HttpStatusCode.BadRequest:
+                        {
+                            var result = response.Content.ReadAsAsync<List<Message>>().Result;
+                            return Result.Create(result);
+                        }
+                    default:
+                        {
+                            return Result.Create(GetUnexpectedResponseStatusCodeMessage(response));
+                        }
+                }
+            };
+            Func<Message, Result> errorHandler = Result.Create;
+            return Request(relativeUri, HttpMethod.Delete, responseHandler, errorHandler);
+        }
+
+        public Task<Result> Delete(object id)
+        {
+            return Delete(id.ToString());
+        }
+
+        private Task<TResult> Request<TResult>(string relativeUri, HttpMethod httpMethod, Func<HttpResponseMessage, TResult> responseMessageHandler, Func<Message, TResult> errorHandler, Action<HttpRequestMessage> requestMessageHandler = null)
+        {
             try
             {
-                using (var client = new HttpClient())
-                {
-                    var response = client.PostAsJsonAsync(uriCreator(Link.Uri).ToString(), body).Result;
+                var requestUri = new Uri(BaseApiUri + relativeUri);
+                var request = new HttpRequestMessage(httpMethod, requestUri);
+                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                    switch (response.StatusCode)
+                if (_globalRequestMessageHandler != null)
+                    _globalRequestMessageHandler(request);
+
+                if (requestMessageHandler != null)
+                    requestMessageHandler(request);
+
+                var httpClient = HttpClientFactory.Create(new CompressionHandler());
+                var resultTask = httpClient.SendAsync(request).ContinueWith(
+                    sendTask =>
                     {
-                        case HttpStatusCode.NoContent:
-                            {
-                                return Result<Tuple<Uri, TResult>>.CreateEmpty();
-                            }
-                        case HttpStatusCode.OK:
-                            {
-                                var result = response.Content.ReadAsAsync<TResult>().Result;
-                                return Result<Tuple<Uri, TResult>>.Create(Tuple.Create<Uri, TResult>(null, result));
-                            }
-                        case HttpStatusCode.Created:
-                            {
-                                var locationUri = response.Headers.Location;
-                                if (response.Content.Headers.ContentLength.HasValue && response.Content.Headers.ContentLength.Value > 0)
-                                {
-                                    var result = response.Content.ReadAsAsync<TResult>().Result;
-                                    return Result<Tuple<Uri, TResult>>.Create(Tuple.Create<Uri, TResult>(locationUri, result));
-                                }
-                                return Result<Tuple<Uri, TResult>>.Create(Tuple.Create<Uri, TResult>(locationUri, default(TResult)));
-                            }
-                        case HttpStatusCode.InternalServerError:
-                            {
-                                var result = response.Content.ReadAsAsync<List<Message>>().Result;
-                                return Result<Tuple<Uri, TResult>>.Create(result);
-                            }
-                        default:
-                            {
-                                var message = new Message(MessageLevel.Error, 402, "Unexpected response accessing API: " + response.StatusCode, string.Empty);
-                                return Result<Tuple<Uri, TResult>>.Create(message);
-                            }
-                    }
+                        httpClient.Dispose();
+                        sendTask.PropagateParentTaskStatus(requestUri.AbsolutePath);
+                        return responseMessageHandler(sendTask.Result);
+
+                    }, TaskContinuationOptions.ExecuteSynchronously);
+
+                return resultTask;
+            }
+            catch (Exception e)
+            {
+                var message = new Message(MessageLevel.Error, (int)MessageCodes.UnexpectedApiRequestError, String.Format("Unexpected error accessing -> {0} {1} - {2}", httpMethod.Method, BaseApiUri + relativeUri, e.Message), String.Empty);
+                var task = new Task<TResult>(() => errorHandler(message));
+                task.Start();
+                return task;
+            }
+
+        }
+        
+        #region Helper Methods/Classes 
+
+        protected virtual IEnumerable<MediaTypeFormatter> CreateDefaultFormatters()
+        {
+            return new []
+            {
+                JsonFormatter,
+                new XmlMediaTypeFormatter(),
+                new FormUrlEncodedMediaTypeFormatter()
+            };
+        }
+
+        private static Message GetUnexpectedResponseStatusCodeMessage(HttpResponseMessage response)
+        {
+            var message = new Message(MessageLevel.Error, (int)MessageCodes.UnexpectedResponseCode, String.Format("Unexpected response accessing -> {0} {1} - {2}: ", response.RequestMessage.Method.Method, response.RequestMessage.RequestUri.AbsoluteUri, response.StatusCode), string.Empty);
+            return message;
+        }
+
+
+        public class DecompressedContent : HttpContent
+        {
+            private readonly string _encodingType;
+            private readonly HttpContent _originalContent;
+
+
+            public DecompressedContent(HttpContent originalContent, string encodingType)
+            {
+                _originalContent = originalContent;
+                _encodingType = encodingType;
+            }
+
+
+            protected override bool TryComputeLength(out long length)
+            {
+                length = -1;
+
+                return false;
+            }
+
+            protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context)
+            {
+                var originalStream = await _originalContent.ReadAsStreamAsync();
+                Stream decompressedStream = null;
+
+                if (_encodingType == "gzip")
+                {
+                    decompressedStream = new GZipStream(originalStream, CompressionMode.Decompress, leaveOpen: true);
+                }
+                else if (_encodingType == "deflate")
+                {
+                    decompressedStream = new DeflateStream(originalStream, CompressionMode.Decompress, leaveOpen: true);
+                }
+
+                if (decompressedStream != null)
+                {
+                    await decompressedStream.CopyToAsync(stream).ContinueWith(tsk =>
+                    {
+                        if (decompressedStream != null)
+                        {
+                            decompressedStream.Dispose();
+                        }
+                    });
                 }
             }
-            catch (Exception)
-            {
-                var message = new Message(MessageLevel.Error, 401, "Unexpected error accessing API.", string.Empty);
-                return Result<Tuple<Uri, TResult>>.Create(message);
-            }
         }
 
-        protected Result Put<T>(T body, Func<Uri, Uri> uriCreator = null)
+        protected class CompressionHandler : DelegatingHandler
         {
-            return Put<T>(string.Empty, body, uriCreator);
-        }
-
-        protected Result Put<T>(string id, T body, Func<Uri, Uri> uriCreator = null)
-        {
-            uriCreator = uriCreator ?? new Func<Uri, Uri>(x => x);
-
-            try
+            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
             {
-                using (var client = new HttpClient())
+                request.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
+                request.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("deflate"));
+
+                var response = await base.SendAsync(request, cancellationToken);
+                var streamContent = response.Content as StreamContent;
+                if (streamContent != null)
                 {
-                    var initialUri = string.IsNullOrWhiteSpace(id) ? Link.Uri : new Uri(Link.Uri, id);
-                    var response = client.PutAsJsonAsync(uriCreator(initialUri).ToString(), body).Result;
-
-                    switch (response.StatusCode)
+                    if (streamContent.Headers.ContentEncoding.Contains("gzip"))
                     {
-                        case HttpStatusCode.OK:
-                        case HttpStatusCode.NoContent:
-                            {
-                                return Result.CreateEmpty();
-                            }
-                        case HttpStatusCode.InternalServerError:
-                            {
-                                var result = response.Content.ReadAsAsync<List<Message>>().Result;
-                                return Result.Create(result);
-                            }
-                        default:
-                            {
-                                var message = new Message(MessageLevel.Error, 402, "Unexpected response accessing API: " + response.StatusCode, string.Empty);
-                                return Result.Create(message);
-                            }
+                        response.Content = WrapWithDecompressedContent(streamContent, "gzip");
+                    }
+                    else if (streamContent.Headers.ContentEncoding.Contains("deflate"))
+                    {
+                        response.Content = WrapWithDecompressedContent(streamContent, "deflate");
                     }
                 }
+
+                return response;
             }
-            catch (Exception)
+
+
+            protected HttpContent WrapWithDecompressedContent(HttpContent streamContent, string encodingScheme)
             {
-                var message = new Message(MessageLevel.Error, 401, "Unexpected error accessing API.", string.Empty);
-                return Result.Create(message);
-            }
-        }
-
-        protected Result Delete(Func<Uri, Uri> uriCreator = null)
-        {
-            return Delete(string.Empty, uriCreator);
-        }
-
-        protected Result Delete(string id, Func<Uri, Uri> uriCreator = null)
-        {
-            uriCreator = uriCreator ?? new Func<Uri, Uri>(x => x);
-
-            try
-            {
-                using (var client = new HttpClient())
+                var replacedContent = new DecompressedContent(streamContent, encodingScheme);
+                foreach (var header in streamContent.Headers)
                 {
-                    var initialUri = string.IsNullOrWhiteSpace(id) ? Link.Uri : new Uri(Link.Uri, id);
-                    var response = client.DeleteAsync(uriCreator(initialUri)).Result;
-
-                    switch (response.StatusCode)
-                    {
-                        case HttpStatusCode.OK:
-                        case HttpStatusCode.NoContent:
-                            {
-                                return Result.CreateEmpty();
-                            }
-                        case HttpStatusCode.InternalServerError:
-                            {
-                                var result = response.Content.ReadAsAsync<List<Message>>().Result;
-                                return Result.Create(result);
-                            }
-                        default:
-                            {
-                                var message = new Message(MessageLevel.Error, 402, "Unexpected response accessing API: " + response.StatusCode, string.Empty);
-                                return Result.Create(message);
-                            }
-                    }
+                    replacedContent.Headers.TryAddWithoutValidation(header.Key, header.Value);
                 }
-            }
-            catch (Exception)
-            {
-                var message = new Message(MessageLevel.Error, 401, "Unexpected error accessing API.", string.Empty);
-                return Result.Create(message);
+                return replacedContent;
             }
         }
+
+        #endregion Helper Methods/Classes
     }
 }
+
+
+//        public Task<Result<T>> Get<T>(string relativeUri, IEnumerable<MediaTypeFormatter> formatters = null)
+//        {
+//            try
+//            {
+//                var requestUri = new Uri(BaseApiUri + relativeUri);
+//                var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+//                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+//
+//                using (var httpClient = HttpClientFactory.Create(new CompressionHandler()))
+//                {
+//                    var resultTask = httpClient.SendAsync(request).ContinueWith(
+//                        sendTask =>
+//                        {
+//                            sendTask.PropagateParentTaskStatus(requestUri.AbsolutePath);
+//
+//                            var response = sendTask.Result;
+//
+//                            switch (response.StatusCode)
+//                            {
+//                                case HttpStatusCode.OK:
+//                                {
+//                                    var result = response.Content.ReadAsAsync<T>().Result;
+//                                    return Result<T>.Create(result);
+//                                }
+//                                case HttpStatusCode.InternalServerError:
+//                                {
+//                                    var result = response.Content.ReadAsAsync<List<Message>>(formatters ?? CreateDefaultFormatters()).Result;
+//                                    return Result<T>.Create(result);
+//                                }
+//                                case HttpStatusCode.NotFound:
+//                                {
+//                                    return Result<T>.CreateEmpty();
+//                                }
+//                                default:
+//                                {
+//                                    var message = new Message(MessageLevel.Error, (int) MessageCodes.UnexpectedResponseCode, "Unexpected response accessing API: " + response.StatusCode, string.Empty);
+//                                    return Result<T>.Create(message);
+//                                }
+//                            }
+//                        }, TaskContinuationOptions.ExecuteSynchronously);
+//
+//                    return resultTask;
+//                }
+//            }
+//            catch (Exception e)
+//            {
+//                var message = new Message(MessageLevel.Error, (int) MessageCodes.UnexpectedApiRequestError, String.Format("Unexpected error accessing API - {0}", e.Message), String.Empty);
+//                var task = new Task<Result<T>>(() =>
+//                {
+//                    return Result<T>.Create(message);
+//                });
+//                task.Start();
+//                return task;
+//
+//            }
+//        }
+//
+//        public Task<Result<List<T>>> GetList<T>(string relativeUri, IEnumerable<MediaTypeFormatter> formatters = null)
+//        {
+//            return Get<List<T>>(relativeUri);
+//        }
+//
+//        public Task<Result<Uri>> Post<TRequestData>(string relativeUri, TRequestData requestData, IEnumerable<MediaTypeFormatter> formatters = null)
+//        {
+//            var returnVal = Post<TRequestData, object>(relativeUri, requestData,  formatters)
+//                .ContinueWith((t) =>
+//                {
+//                    var result = t.Result;
+//                    if (result.Failure)
+//                    {
+//                        return Result<Uri>.Create(result.Messages);
+//                    }
+//                    return Result<Uri>.Create(result.Value.Item1); // the Uri
+//                
+//                }, TaskContinuationOptions.ExecuteSynchronously);
+//            
+//            return returnVal;
+//        }
+//
+//        public Task<Result<Tuple<Uri, TResult>>> Post<TRequestData, TResult>(string relativeUri, TRequestData requestData, IEnumerable<MediaTypeFormatter> formatters = null)
+//        {
+//            try
+//            {
+//                var requestUri = new Uri(BaseApiUri + relativeUri);
+//                var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+//                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+//                request.Content = new ObjectContent<TRequestData>(requestData, JsonFormatter);
+//
+//                using (var httpClient = HttpClientFactory.Create(new CompressionHandler()))
+//                {
+//                    var resultTask = httpClient.SendAsync(request).ContinueWith(
+//                        sendTask =>
+//                        {
+//                            sendTask.PropagateParentTaskStatus(requestUri.AbsolutePath);
+//
+//                            var response = sendTask.Result;
+//
+//                            switch (response.StatusCode)
+//                            {
+//                                case HttpStatusCode.NoContent:
+//                                {
+//                                    return Result<Tuple<Uri, TResult>>.CreateEmpty();
+//                                }
+//                                case HttpStatusCode.OK:
+//                                    {
+//                                        var result = response.Content.ReadAsAsync<TResult>().Result;
+//                                        return Result<Tuple<Uri, TResult>>.Create(Tuple.Create<Uri, TResult>(null, result));
+//                                    }
+//                                case HttpStatusCode.Created:
+//                                    {
+//                                        var locationUri = response.Headers.Location;
+//                                        if (response.Content.Headers.ContentLength.HasValue && response.Content.Headers.ContentLength.Value > 0)
+//                                        {
+//                                            var result = response.Content.ReadAsAsync<TResult>().Result;
+//                                            return Result<Tuple<Uri, TResult>>.Create(Tuple.Create<Uri, TResult>(locationUri, result));
+//                                        }
+//                                        return Result<Tuple<Uri, TResult>>.Create(Tuple.Create<Uri, TResult>(locationUri, default(TResult)));
+//                                    }
+//                                case HttpStatusCode.InternalServerError:
+//                                    {
+//                                        var result = response.Content.ReadAsAsync<List<Message>>().Result;
+//                                        return Result<Tuple<Uri, TResult>>.Create(result);
+//                                    }
+//                                default:
+//                                    {
+//                                        var message = new Message(MessageLevel.Error, (int)MessageCodes.UnexpectedResponseCode, "Unexpected response accessing API: " + response.StatusCode, string.Empty);
+//                                        return Result<Tuple<Uri, TResult>>.Create(message);
+//                                    }
+//                            }
+//                        }, TaskContinuationOptions.ExecuteSynchronously);
+//
+//                    return resultTask;
+//                }
+//            }
+//            catch (Exception e)
+//            {
+//                var message = new Message(MessageLevel.Error, (int)MessageCodes.UnexpectedApiRequestError, String.Format("Unexpected error accessing API - {0}", e.Message), String.Empty);
+//                return new Task<Result<Tuple<Uri, TResult>>>(() => Result<Tuple<Uri, TResult>>.Create(message));
+//            }
+//        }
+//
+//        public Task<Result> Put<TRequestData>(string relativeUri, TRequestData requestData, IEnumerable<MediaTypeFormatter> formatters = null)
+//        {
+//            try
+//            {
+//                var requestUri = new Uri(BaseApiUri + relativeUri);
+//                var request = new HttpRequestMessage(HttpMethod.Put, requestUri);
+//                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+//                request.Content = new ObjectContent<TRequestData>(requestData, JsonFormatter);
+//
+//                using (var httpClient = HttpClientFactory.Create(new CompressionHandler()))
+//                {
+//                    var resultTask = httpClient.SendAsync(request).ContinueWith(
+//                        sendTask =>
+//                        {
+//                            sendTask.PropagateParentTaskStatus(requestUri.AbsolutePath);
+//
+//                            var response = sendTask.Result;
+//
+//                            switch (response.StatusCode)
+//                            {
+//                                case HttpStatusCode.NoContent:
+//                                case HttpStatusCode.OK:
+//                                    {
+//                                        return Result.CreateEmpty();
+//                                    }
+//                                case HttpStatusCode.InternalServerError:
+//                                    {
+//                                        var result = response.Content.ReadAsAsync<List<Message>>().Result;
+//                                        return Result.Create(result);
+//                                    }
+//                                default:
+//                                    {
+//                                        var message = new Message(MessageLevel.Error, (int)MessageCodes.UnexpectedResponseCode, "Unexpected response accessing API: " + response.StatusCode, string.Empty);
+//                                        return Result.Create(message);
+//                                    }
+//                            }
+//                        }, TaskContinuationOptions.ExecuteSynchronously);
+//
+//                    return resultTask;
+//                }
+//            }
+//            catch (Exception e)
+//            {
+//                var message = new Message(MessageLevel.Error, (int)MessageCodes.UnexpectedApiRequestError, String.Format("Unexpected error accessing API - {0}", e.Message), String.Empty);
+//                return new Task<Result>(() => Result.Create(message));
+//            }
+//        }
+//
+//        public Task<Result> Delete(string relativeUri, IEnumerable<MediaTypeFormatter> formatters = null)
+//        {
+//            try
+//            {
+//                var requestUri = new Uri(BaseApiUri + relativeUri);
+//                var request = new HttpRequestMessage(HttpMethod.Delete, requestUri);
+//                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+//
+//                using (var httpClient = HttpClientFactory.Create(new CompressionHandler()))
+//                {
+//                    var resultTask = httpClient.SendAsync(request).ContinueWith(
+//                        sendTask =>
+//                        {
+//                            sendTask.PropagateParentTaskStatus(requestUri.AbsolutePath);
+//
+//                            var response = sendTask.Result;
+//
+//                            switch (response.StatusCode)
+//                            {
+//                                case HttpStatusCode.NoContent:
+//                                case HttpStatusCode.OK:
+//                                    {
+//                                        return Result.CreateEmpty();
+//                                    }
+//                                case HttpStatusCode.InternalServerError:
+//                                    {
+//                                        var result = response.Content.ReadAsAsync<List<Message>>().Result;
+//                                        return Result.Create(result);
+//                                    }
+//                                default:
+//                                    {
+//                                        var message = new Message(MessageLevel.Error, (int)MessageCodes.UnexpectedResponseCode, "Unexpected response accessing API: " + response.StatusCode, string.Empty);
+//                                        return Result.Create(message);
+//                                    }
+//                            }
+//                        }, TaskContinuationOptions.ExecuteSynchronously);
+//
+//                    return resultTask;
+//                }
+//            }
+//            catch (Exception e)
+//            {
+//                var message = new Message(MessageLevel.Error, (int)MessageCodes.UnexpectedApiRequestError, String.Format("Unexpected error accessing API - {0}", e.Message), String.Empty);
+//                return new Task<Result>(() => Result.Create(message));
+//            }
+//        }

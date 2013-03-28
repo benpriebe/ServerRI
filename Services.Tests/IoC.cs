@@ -1,9 +1,11 @@
 ﻿#region Using directives
 
+using System;
 using System.Configuration;
 using System.Data.Common;
 using System.Data.Entity;
 using Autofac;
+using Autofac.Core;
 using Contracts.Data;
 using Core;
 using Core.IoCModules;
@@ -61,6 +63,6 @@ namespace Services.Tests
 
             Container = builder.Build();
         }
-
+       
     }
 }

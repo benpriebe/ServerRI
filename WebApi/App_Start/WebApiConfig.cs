@@ -13,6 +13,8 @@ namespace WebApi
     public static class WebApiConfig
     {
         public const string ProductsRouteName = "Products";
+        public const string ProductsWithDetailsRouteName = "ProductsWithDetails";
+        public const string ProductsSoldOutRouteName = "ProductsSoldOutRouteName";
 
         public static void Configure(HttpConfiguration configuration)
         {
@@ -30,6 +32,25 @@ namespace WebApi
 
         public static void RegisterRoutes(HttpRouteCollection routes)
         {
+            routes.MapHttpRoute(
+                name: ProductsWithDetailsRouteName,
+                routeTemplate: "api/products/details",
+                defaults: new
+                {
+                    controller = "Products",
+                    id = RouteParameter.Optional,
+                    action = "Details"
+                });
+
+            routes.MapHttpRoute(
+             name: ProductsSoldOutRouteName,
+             routeTemplate: "api/products/{id}/mark-sold-out",
+             defaults: new
+             {
+                 controller = "Products",
+                 action = "MarkSoldOut"
+             });
+
             routes.MapHttpRoute(
                 name: ProductsRouteName,
                 routeTemplate: "api/products/{id}",
