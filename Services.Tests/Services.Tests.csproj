@@ -43,6 +43,10 @@
     <Reference Include="Autofac.Configuration">
       <HintPath>..\packages\Autofac.3.0.1\lib\net40\Autofac.Configuration.dll</HintPath>
     </Reference>
+    <Reference Include="AutoMapper, Version=2.2.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\AutoMapper.2.2.1\lib\net40\AutoMapper.dll</HintPath>
+    </Reference>
     <Reference Include="Common.Logging">
       <HintPath>..\packages\Common.Logging.2.1.2\lib\net40\Common.Logging.dll</HintPath>
     </Reference>
@@ -80,6 +84,7 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="E2ETests\CustomersServiceE2ETest.cs" />
     <Compile Include="E2ETests\ProductsServiceE2ETest.cs" />
     <Compile Include="IoC.cs" />
     <Compile Include="UnitTests\ProductsServiceTest.cs" />

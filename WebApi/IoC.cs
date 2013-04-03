@@ -65,9 +65,9 @@ namespace WebApi
             builder.RegisterType<UnitOfWork>().As<IUnitOfWork>();
 
             builder.RegisterType<ProductsProvider>().As<IProductsProvider>();
-            builder.RegisterType<EFProvider<Customer>>().As<IProvider<Customer>>();
             builder.RegisterType<ExternalProvider>().As<IExternalProvider>();
-
+            builder.RegisterGeneric(typeof(EFProvider<>)).As(typeof(IProvider<>));
+            
             //TODO: 18-Mar-2013 - Ben - Figure out how to do this with chose authentication model.
             // operationcontext - should only have one instance per thread/user
             builder.RegisterInstance(new OperationContext(new UserDetails(1.ToString(), "To Do", "to.do")));

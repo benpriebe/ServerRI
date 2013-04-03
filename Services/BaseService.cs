@@ -31,7 +31,7 @@ namespace Services
             _uow = uow;
         }
 
-        protected static MappingEngine Mapper { get; private set; }
+        public static MappingEngine Mapper { get; private set; }
 
         public Func<IUnitOfWork> UoW
         {

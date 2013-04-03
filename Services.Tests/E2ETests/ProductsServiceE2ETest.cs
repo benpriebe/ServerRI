@@ -1,10 +1,13 @@
 ﻿#region Using directives
 
 using System;
+using System.Data.Entity;
 using System.Linq;
 using System.Transactions;
 using Api.Common;
 using Autofac;
+using Contracts.Data;
+using Data.Entities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Models.Products;
 using Models.Products.Resx;
@@ -17,7 +20,8 @@ namespace Services.Tests.E2ETests
     [TestClass]
     public class ProductsServiceE2ETest
     {
-        protected ProductsService _service = IoC.Container.Resolve<ProductsService>();
+        private readonly ProductsService _service = IoC.Container.Resolve<ProductsService>();
+        private readonly Func<IUnitOfWork> _uow = IoC.Container.Resolve<Func<IUnitOfWork>>();
 
         [TestMethod]
         [TestCategory("Database")]
@@ -106,17 +110,67 @@ namespace Services.Tests.E2ETests
 
         [TestMethod]
         [TestCategory("Database")]
-        public void UpdateProduct_Success()
+        public void UpdateProduct_ModifyingProductCategoryValue()
         {
-            throw new NotImplementedException("Left as an excercise for the reader");
+            using (new TransactionScope())
+            {
+                var updateModel = new ProductModelUpdateRequest()
+                {
+                    ProductID = 680,
+                    ListPrice = 10M,
+                    StandardCost = 20M,
+                    ProductCategory = new ProductCategoryModel { Name = "Nana" },
+                };
+                
+                // Act
+                var updateResult = _service.UpdateProduct(updateModel);
+                Assert.IsTrue(updateResult.Success);
+
+                using (var uow = _uow())
+                {
+                    var updatedProduct = uow.Products.GetAll().Include(p => p.ProductCategory).FirstOrDefault(p => p.ProductID == updateModel.ProductID);
+                    Assert.AreEqual(updateModel.ProductCategory.Name, updatedProduct.ProductCategory.Name);
+                }
+            }
         }
 
         [TestMethod]
         [TestCategory("Database")]
-        public void UpdateProduct_Failure()
+        public void UpdateProduct_LinkingToAnotherProductCategory()
         {
-            throw new NotImplementedException("Left as an excercise for the reader");
+            Product existingProduct;
+            ProductCategory existingProductCategory;
+            using (var uow = _uow())
+            {
+                existingProduct = uow.Products.GetAll().FirstOrDefault(p =>p.ProductCategoryID != null);
+                existingProductCategory = uow.ProductCategories.GetAll().FirstOrDefault(pc => pc.ProductCategoryID != existingProduct.ProductCategoryID);
+            }
+
+            using (new TransactionScope())
+            {
+                var updateModel = new ProductModelUpdateRequest()
+                {
+                    ProductID = 680,
+                    ListPrice = 10M,
+                    StandardCost = 20M,
+                    ProductCategoryID = existingProductCategory.ProductCategoryID
+                };
+
+                // Act
+                var updateResult = _service.UpdateProduct(updateModel);
+                Assert.IsTrue(updateResult.Success);
+
+                using (var uow = _uow())
+                {
+                    var updatedProduct = uow.Products.GetAll().Include(p => p.ProductCategory).FirstOrDefault(p => p.ProductID == updateModel.ProductID);
+                    Assert.AreNotEqual(updatedProduct.ProductCategoryID, existingProduct.ProductCategoryID);
+                    Assert.AreEqual(existingProductCategory.ProductCategoryID, updatedProduct.ProductCategoryID);
+                }
+                
+            }
         }
+
+      
 
         [TestMethod]
         [TestCategory("Database")]

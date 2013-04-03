@@ -46,6 +46,9 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Addresses\AddressModel.cs" />
+    <Compile Include="Customers\CustomerAddressModel.cs" />
+    <Compile Include="Customers\CustomerModel.cs" />
     <Compile Include="FilterRequest.cs" />
     <Compile Include="Products\Resx\Strings.Designer.cs">
       <AutoGen>True</AutoGen>

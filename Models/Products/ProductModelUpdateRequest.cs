@@ -13,5 +13,23 @@ namespace Models.Products
 
         [Range(0, 99999), Display]
         public decimal ListPrice { get; set; }
+
+        [Display]
+        public int ProductCategoryID { get; set; }
+
+        [Display]
+        public virtual ProductCategoryModel ProductCategory { get; set; }
+    }
+
+    public class ProductCategoryModel
+    {
+        [Display]
+        public int ProductCategoryID { get; set; }
+        
+        [Display]
+        public int? ParentProductCategoryID { get; set; }
+        
+        [Display]
+        public string Name { get; set; }
     }
 }

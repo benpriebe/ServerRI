@@ -46,8 +46,8 @@ namespace Providers.Tests
             // providers
             builder.RegisterType<UnitOfWork>().As<IUnitOfWork>();
             builder.RegisterType<ProductsProvider>().As<IProductsProvider>();
-            builder.RegisterType<EFProvider<Customer>>().As<IProvider<Customer>>();
             builder.RegisterType<ExternalProvider>().As<IExternalProvider>();
+            builder.RegisterGeneric(typeof(EFProvider<>)).As(typeof(IProvider<>));
 
             // logging
             builder.RegisterModule<IoCLoggingModule>();

@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Data.Entity;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -14,6 +15,7 @@ using Core.Extensions;
 using Data.Entities;
 using Models.Products;
 using Providers;
+using Services.Mappings;
 using Services.Resx;
 
 #endregion
@@ -128,7 +130,9 @@ namespace Services
                     {
                         Console.Out.WriteLine("C - " + watch.ElapsedMilliseconds);
 
-                        var entity = uow.Products.GetById(product.ProductID);
+                        var entity = uow.Products.GetAll()
+                            .Include(p => p.ProductCategory)
+                            .SingleOrDefault(p => p.ProductID == product.ProductID);
 
                         Console.Out.WriteLine("D - " + watch.ElapsedMilliseconds);
 
@@ -136,8 +140,8 @@ namespace Services
                         {
                             return Result.CreateNotFound<Product>(product.ProductID);
                         }
-                        entity.ListPrice = product.ListPrice;
-                        entity.StandardCost = product.StandardCost;
+
+                        Mapper.Map(product, entity);
                         entity.ModifiedDate = DateTime.UtcNow;
 
                         uow.Commit();

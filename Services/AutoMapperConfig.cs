@@ -18,6 +18,7 @@ namespace Services
         {
             var mapperConfig = new ConfigurationStore(new TypeMapFactory(), MapperRegistry.AllMappers());
             new ProductMapper().ConfigureMap(mapperConfig);
+            new CustomerMapper().ConfigureMap(mapperConfig);
 
             var mapper = new MappingEngine(mapperConfig);
             Mapper.AssertConfigurationIsValid();

@@ -68,6 +68,8 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="CustomersService.cs" />
+    <Compile Include="Mappings\CustomerMapper.cs" />
     <Compile Include="ResultExtensions.cs" />
     <Compile Include="AutoMapperConfig.cs" />
     <Compile Include="BaseService.cs" />

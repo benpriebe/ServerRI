@@ -14,5 +14,8 @@ namespace Contracts.Data
 
         IProductsProvider Products { get; }
         IProvider<Customer> Customers { get; }
+        IProvider<SalesOrderDetail> OrderDetails { get; }
+        IProvider<ProductCategory> ProductCategories { get; }
+        IProvider<Address> Addresses { get; }
     }
 }
