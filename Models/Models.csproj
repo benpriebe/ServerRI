@@ -72,6 +72,10 @@
       <Project>{027A3FAE-A424-40D6-B778-3F2DECFD02E7}</Project>
       <Name>Contracts</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Core\Core.csproj">
+      <Project>{0BD00D6C-EC41-48C9-9C39-BB86E087456A}</Project>
+      <Name>Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Products\Resx\Strings.en-AU.resx" />

@@ -17,6 +17,16 @@ namespace Core.Extensions
             return expression;
         }
 
+        public static IMappingExpression<TSource, TDest> IgnorePropertiesThatHaveNotBeenSet<TSource, TDest>(this IMappingExpression<TSource, TDest> expression)
+        {
+            expression.ForAllMembers(opt => opt.Condition(ctx =>
+            {
+                var changeTracker  = ctx.Parent.SourceValue as IPropertyChangeTracker;
+                return changeTracker == null || changeTracker.IsModified(ctx.MemberName);
+            }));
+            return expression;
+        }
+
         public static object GetDefault(Type t)
         {
             return t.IsValueType ? Activator.CreateInstance(t) : null;

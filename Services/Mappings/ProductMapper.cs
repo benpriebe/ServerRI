@@ -37,19 +37,11 @@ namespace Services.Mappings
                 .ReverseMap();
 
             mapperConfig.CreateMap<ProductCategoryModel, ProductCategory>()
-                .IgnoreAllUnmapped()
-                .IgnoreAllSourceDefaultValues()
-                .ForMember(d => d.ProductCategoryID, opt => opt.MapFrom(s => s.ProductCategoryID))
-                .ForMember(d => d.Name, opt => opt.MapFrom(s => s.Name));
+                .IgnorePropertiesThatHaveNotBeenSet()
+                .ReverseMap();
 
             mapperConfig.CreateMap<ProductModelUpdateRequest, Product>()
-                .IgnoreAllUnmapped()
-                .IgnoreAllSourceDefaultValues()
-                .ForMember(d => d.ProductID, opt => opt.MapFrom(s => s.ProductID))
-                .ForMember(d => d.StandardCost, opt => opt.MapFrom(s => s.StandardCost))
-                .ForMember(d => d.ListPrice, opt => opt.MapFrom(s => s.ListPrice))
-                .ForMember(d => d.ProductCategory, opt => opt.MapFrom(s => s.ProductCategory))
-                .ForMember(d => d.ProductCategoryID, opt => opt.MapFrom(s => s.ProductCategoryID))
+                .IgnorePropertiesThatHaveNotBeenSet()
                 .ReverseMap();
         }
 

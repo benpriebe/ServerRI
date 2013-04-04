@@ -58,7 +58,6 @@ namespace Services
             }
         }
 
-
         public Result UpdateCustomer(CustomerModel customer)
         {
             using (new OperationLogger(Log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with customer {0}", customer.ToJson()))))
