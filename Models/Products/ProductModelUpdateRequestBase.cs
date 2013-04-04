@@ -12,9 +12,6 @@ namespace Models.Products
             get { return _productCategoryId; }
             set
             {
-                if (_productCategoryId == value)
-                    return;
-
                 _productCategoryId = value;
                 OnPropertyChanged();
             }

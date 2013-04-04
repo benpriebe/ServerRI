@@ -22,9 +22,6 @@ namespace Models.Products
             get { return _productId; }
             set
             {
-                if (_productId == value)
-                    return;
-
                 _productId = value;
                 OnPropertyChanged();
             }
@@ -36,8 +33,6 @@ namespace Models.Products
             get { return _standardCost; }
             set
             {
-                if (_standardCost == value)
-                    return;
                 _standardCost = value;
                 OnPropertyChanged();
             }
@@ -49,8 +44,6 @@ namespace Models.Products
             get { return _listPrice; }
             set
             {
-                if (_listPrice == value)
-                    return;
                 _listPrice = value;
                 OnPropertyChanged();
             }
@@ -62,13 +55,10 @@ namespace Models.Products
             get { return _productCategory; }
             set
             {
-                if (_productCategory == value)
-                    return;
                 _productCategory = value;
                 OnPropertyChanged();
             }
         }
-       
     }
 
     public class ProductCategoryModel : ModelBase
@@ -81,10 +71,7 @@ namespace Models.Products
             get { return _name; }
             set
             {
-                if (_name == value)
-                    return;
-                
-                _name = value; 
+                _name = value;
                 OnPropertyChanged();
             }
         }
