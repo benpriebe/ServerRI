@@ -47,8 +47,7 @@ namespace WebApi.Tests.Controllers
             route = RouteInfo.Verify(config, HttpMethod.Get, BaseUri + "details", typeof(ProductsController), "Details");
             
             // arrange/act/assert
-            route = RouteInfo.Verify(config, HttpMethod.Get, BaseUri + "?productname=blah&top=1&skip=10", typeof(ProductsController), "Default");
-            Assert.IsTrue(route.Params.Any(p => p.ParameterType == typeof(ProductModelFilterRequest)));
+            route = RouteInfo.Verify(config, HttpMethod.Get, BaseUri + "?$filter=startswith(Name, 'Mountain') eq true&$top=2&$skip=3", typeof(ProductsController), "Default");
             
             // arrange/act/assert
             route = RouteInfo.Verify(config, HttpMethod.Post, BaseUri, typeof(ProductsController), "Default");

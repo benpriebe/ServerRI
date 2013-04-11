@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using Api.Common;
 using Common.Logging;
@@ -11,6 +12,7 @@ using Contracts.Data;
 using Core;
 using Core.Extensions;
 using Data.Entities;
+using Models.Addresses;
 using Models.Customers;
 using Providers;
 
@@ -25,6 +27,59 @@ namespace Services
         {
         }
 
+        public Result<CustomerModelResponse> GetCustomerById(int customerId)
+        {
+            using (new OperationLogger(Log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with productId {0}", customerId))))
+            {
+                using (var uow = UoW())
+                {
+                    var entity = uow.Customers.GetById(customerId);
+                    return entity == null
+                        ? Result<CustomerModelResponse>.CreateNotFound<Customer>(customerId)
+                        : Result<CustomerModelResponse>.Create(Mapper.Map<CustomerModelResponse>(entity));
+                }
+            }
+        }
+
+        public Result<IQueryable<CustomerModelResponse>> QueryCustomers(bool withAddresses = false)
+        {
+            using (new OperationLogger(Log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context)))
+            {
+                var uow = UoW(); // note: we cannot dispose of the UnitOfWork here as we need it to stay alive until the query is executed.
+
+                // note: while it would be nice to use auto-model to do the entity-to-model projection; auto-mapper isn't capable of doing this.
+                var query = uow.Customers.GetAll().Select(withAddresses ? GetCustomersWithAddresses() : GetCustomers());
+                return Result<IQueryable<CustomerModelResponse>>.Create(query);
+            }
+        }
+
+
+        public Result<IQueryable<CustomerAddressModel>> QueryCustomerAddresses(int customerId)
+        {
+            using (new OperationLogger(Log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context)))
+            {
+                var uow = UoW(); // note: we cannot dispose of the UnitOfWork here as we need it to stay alive until the query is executed.
+
+                // note: while it would be nice to use auto-model to do the entity-to-model projection; auto-mapper isn't capable of doing this.
+                var query = uow.Customers.GetAll().Where(c => c.CustomerID == customerId).SelectMany(entity => entity.CustomerAddresses.Select(e => new CustomerAddressModel
+                {
+                    AddressID = e.AddressID,
+                    AddressType = e.AddressType,
+                    Address = new AddressModel
+                    {
+                        AddressID = e.Address.AddressID,
+                        AddressLine1 = e.Address.AddressLine1,
+                        AddressLine2 = e.Address.AddressLine2,
+                        City = e.Address.City,
+                        CountryRegion = e.Address.CountryRegion,
+                        StateProvince = e.Address.StateProvince,
+                        PostalCode = e.Address.PostalCode
+                    }
+                }));
+                return Result<IQueryable<CustomerAddressModel>>.Create(query);
+            }
+        }
+
         public Result<int?> AddCustomer(CustomerModel customer)
         {
             using (new OperationLogger(Log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context, String.Format("with customer {0}", customer.ToJson()))))
@@ -36,7 +91,7 @@ namespace Services
 
                 var entity = Mapper.Map<Customer>(customer);
                 UpdateModifiedDateAndRowGuids(entity);
-                
+
                 try
                 {
                     using (var uow = UoW())
@@ -111,6 +166,51 @@ namespace Services
                     custAddress.Address.rowguid = Guid.NewGuid();
                 }
             }
+        }
+
+        private Expression<Func<Customer, CustomerModelResponse>> GetCustomersWithAddresses()
+        {
+            return entity => new CustomerModelResponse
+            {
+                CustomerID = entity.CustomerID,
+                FirstName = entity.FirstName,
+                MiddleName = entity.MiddleName,
+                Surname = entity.LastName,
+                CompanyName = entity.CompanyName,
+                EmailAddress = entity.EmailAddress,
+                Title = entity.Title,
+                Phone = entity.Phone,
+                CustomerAddresses = entity.CustomerAddresses.Select(e => new CustomerAddressModel()
+                {
+                    AddressID = e.AddressID,
+                    AddressType = e.AddressType,
+                    Address = new AddressModel
+                    {
+                        AddressID = e.Address.AddressID,
+                        AddressLine1 = e.Address.AddressLine1,
+                        AddressLine2 = e.Address.AddressLine2,
+                        City = e.Address.City,
+                        CountryRegion = e.Address.CountryRegion,
+                        StateProvince = e.Address.StateProvince,
+                        PostalCode = e.Address.PostalCode
+                    }
+                })
+            };
+        }
+
+        private Expression<Func<Customer, CustomerModelResponse>> GetCustomers()
+        {
+            return entity => new CustomerModelResponse
+            {
+                CustomerID = entity.CustomerID,
+                FirstName = entity.FirstName,
+                MiddleName = entity.MiddleName,
+                Surname = entity.LastName,
+                CompanyName = entity.CompanyName,
+                EmailAddress = entity.EmailAddress,
+                Title = entity.Title,
+                Phone = entity.Phone,
+            };
         }
     }
 }

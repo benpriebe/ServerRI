@@ -19,6 +19,10 @@ namespace Services.Mappings
             mapperConfig.CreateMap<CustomerModel, Customer>()
                 .ReverseMap();
 
+            mapperConfig.CreateMap<Customer, CustomerModelResponse>()
+                .ForMember(d => d.Surname, opt => opt.MapFrom(s => s.LastName))
+                .ReverseMap();
+
             mapperConfig.CreateMap<CustomerAddressModel, CustomerAddress>()
                 .ReverseMap();
 

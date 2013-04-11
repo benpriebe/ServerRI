@@ -18,6 +18,8 @@ using Data.Entities;
 using Providers.Data;
 using Providers.External;
 using Services;
+using WebApi.Controllers;
+using WebApi.Controllers.OData;
 
 #endregion
 
@@ -80,6 +82,10 @@ namespace WebApi
 
             // localized model/validation metadata stuff.
             builder.Register(c => new LocalizationProvider<Models.Resx.Strings>(Models.Resx.Strings.ResourceManager)).As<ModelMetadataProvider>();
+
+            // odata controllers
+            builder.RegisterType<ProductModelsController>();
+            builder.RegisterType<CustomerModelsController>();
 
             Container = builder.Build();
 

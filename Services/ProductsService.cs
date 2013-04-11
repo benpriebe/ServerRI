@@ -217,7 +217,7 @@ namespace Services
                 using (var uow = UoW())
                 {
                     var query = uow.Products.GetAll();
-                    //TODO: 17-Mar-2013 - Ben - make this more generic and reusable
+                    // note: this demonstrates a manual approach to providing filters etc. the QueryProducts() method used on conjuction with the web api odata provides a more flexible approach.
                     if (filter != null)
                     {
                         query = !String.IsNullOrWhiteSpace(filter.ProductName) ? query.Where(p => p.Name.StartsWith(filter.ProductName)) : query;
@@ -228,6 +228,25 @@ namespace Services
                     var entities = query.ToList();
                     return Result<IList<ProductModel>>.Create(Mapper.Map<IList<ProductModel>>(entities));
                 }
+            }
+        }
+
+        public Result<IQueryable<ProductModel>> QueryProducts()
+        {
+            using (new OperationLogger(Log, m => m.Invoke(GetType(), MethodBase.GetCurrentMethod(), Context)))
+            {
+                var uow = UoW(); // note: we cannot dispose of the UnitOfWork here as we need it to stay alive until the query is executed.
+                
+                // note: while it would be nice to use auto-model to do the entity-to-model projection; auto-mapper isn't capable of doing this.
+                var query = uow.Products.GetAll().Select(entity => new ProductModel
+                {
+                    Id = entity.ProductID,
+                    ListPrice = entity.ListPrice,
+                    Name = entity.Name,
+                    ProductNumber = entity.ProductNumber,
+                    StandardCost = entity.StandardCost
+                });
+                return Result<IQueryable<ProductModel>>.Create(query);
             }
         }
 

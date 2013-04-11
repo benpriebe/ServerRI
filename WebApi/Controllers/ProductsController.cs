@@ -1,8 +1,11 @@
 ﻿#region Using directives
 
 using System;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using Api.Common;
 using Api.Web.Extensions;
 using Autofac.Integration.WebApi;
 using Common.Logging;
@@ -32,14 +35,14 @@ namespace WebApi.Controllers
             return Request.CreateGetResponseFor(result);
         }
 
-        // GET {base}/api/products?productname={name}&top={top}&skip={skip}
+        // GET {base}/api/products/?$filter=...insert odata query... 
+        // OData Query Syntax -  http://msdn.microsoft.com/en-us/library/ff478141.aspx, http://www.odata.org/documentation/odata-v2-documentation/uri-conventions/
+        // NOTE: you can limit the query constraints by adding constraints to this attribute. http://www.asp.net/web-api/overview/odata-support-in-aspnet-web-api/supporting-odata-query-options
+        [Queryable]
         [ActionName("Default")]
-        public HttpResponseMessage Get([FromUri] ProductModelFilterRequest filter)
+        public HttpResponseMessage Get()
         {
-            if (filter.ProductName == "error") // note: do not do this in production env.
-                throw new Exception("This is to show how exceptions are handled by default in WebAPI");
-
-            var result = _service.GetProducts(filter);
+            var result = _service.QueryProducts();
             return Request.CreateGetResponseFor(result);
         }
 

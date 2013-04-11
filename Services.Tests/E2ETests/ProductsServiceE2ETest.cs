@@ -120,6 +120,7 @@ namespace Services.Tests.E2ETests
                     ListPrice = 10M,
                     StandardCost = 20M,
                     ProductCategory = new ProductCategoryModel { Name = "Nana" },
+                    
                 };
                 
                 // Act
@@ -169,8 +170,6 @@ namespace Services.Tests.E2ETests
                 
             }
         }
-
-      
 
         [TestMethod]
         [TestCategory("Database")]
