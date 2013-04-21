@@ -18,7 +18,7 @@ namespace Api.Web.Extensions
         {
             return result.Success
                 ? request.CreateResponse(HttpStatusCode.NoContent)
-                : request.CreateFailureResponseFor(result.Messages, result.NotFound ? HttpStatusCode.NotFound : HttpStatusCode.BadRequest);
+                : request.CreateFailureResponseFor(result.Messages, GetFailureStatusCode(result));
         }
 
         private static HttpResponseMessage CreateDefaultResponseFor<TResult, TValue>(this HttpRequestMessage request, Result<TResult> result, TValue value)
@@ -30,7 +30,7 @@ namespace Api.Web.Extensions
                     : request.CreateResponse(HttpStatusCode.NoContent);
             }
 
-            return request.CreateFailureResponseFor(result.Messages, result.NotFound ? HttpStatusCode.NotFound : HttpStatusCode.BadRequest);
+            return request.CreateFailureResponseFor(result.Messages, GetFailureStatusCode(result));
         }
 
         public static HttpResponseMessage CreateFailureResponseFor(this HttpRequestMessage request, IList<Message> messages, HttpStatusCode statusCode = HttpStatusCode.BadRequest)
@@ -87,7 +87,7 @@ namespace Api.Web.Extensions
                 return response;
             }
 
-            return request.CreateFailureResponseFor(result.Messages, result.NotFound ? HttpStatusCode.NotFound : HttpStatusCode.BadRequest);
+            return request.CreateFailureResponseFor(result.Messages, GetFailureStatusCode(result));
         }
 
         public static HttpResponseMessage CreatePostResponseFor<T>(this HttpRequestMessage request, Result<T> result, string locationRouteName, object locationRouteValues)
@@ -128,7 +128,7 @@ namespace Api.Web.Extensions
                 return response;
             }
 
-            return request.CreateFailureResponseFor(result.Messages, result.NotFound ? HttpStatusCode.NotFound : HttpStatusCode.BadRequest);
+            return request.CreateFailureResponseFor(result.Messages, GetFailureStatusCode(result));
         }
 
         public static HttpResponseMessage CreatePutResponseFor(this HttpRequestMessage request, Result result)
@@ -166,6 +166,23 @@ namespace Api.Web.Extensions
             return new Uri(request.RequestUri, request.GetUrlHelper().Route(routeName, routeValues));
         }
 
+        private static HttpStatusCode GetFailureStatusCode(Result result)
+        {
+            if (result.NotFound)
+                return HttpStatusCode.NotFound;
+            if (result.Unauthorized)
+                return HttpStatusCode.Unauthorized;
+            return HttpStatusCode.BadRequest;
+        }
+
+        private static HttpStatusCode GetFailureStatusCode<TResult>(Result<TResult> result)
+        {
+            if (result.NotFound)
+                return HttpStatusCode.NotFound;
+            if (result.Unauthorized)
+                return HttpStatusCode.Unauthorized;
+            return HttpStatusCode.BadRequest;
+        }
 
         #region Generice Response Convenience Methods
 

@@ -22,7 +22,12 @@ namespace Api.Common
 
         public bool NotFound
         {
-            get { return Messages != null && Messages.Any(m => m.Code == (int) MessageCodes.NotFound); }
+            get { return Messages != null && Messages.Any(m => m.Code == (int)MessageCodes.NotFound); }
+        }
+
+        public bool Unauthorized
+        {
+            get { return Messages != null && Messages.Any(m => m.Code == (int)MessageCodes.Unauthorized); }
         }
 
         public List<Message> Messages { get; set; }
@@ -88,7 +93,12 @@ namespace Api.Common
 
         public bool NotFound
         {
-            get { return Messages != null && Messages.Any(m => m.Code == (int) MessageCodes.NotFound); }
+            get { return Messages != null && Messages.Any(m => m.Code == (int)MessageCodes.NotFound); }
+        }
+
+        public bool Unauthorized
+        {
+            get { return Messages != null && Messages.Any(m => m.Code == (int)MessageCodes.Unauthorized); }
         }
 
         public T Value { get; set; }
@@ -125,8 +135,7 @@ namespace Api.Common
 
         public static Result<T> CreateValidationErrors(params ValidationResult[] errors)
         {
-            var messages = errors.ToList().Select((vr) => new Message(MessageLevel.Error, (int) MessageCodes.ValidationError, vr.ErrorMessage, vr.MemberNames.ToArray()));
-            return Create(messages);
+            return Create(errors.ToList().Select((vr) => new Message(MessageLevel.Error, (int)MessageCodes.ValidationError, vr.ErrorMessage, vr.MemberNames.ToArray())));
         }
 
         public static Result<T> Create(T value)
