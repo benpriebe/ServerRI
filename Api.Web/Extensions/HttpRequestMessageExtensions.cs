@@ -131,6 +131,16 @@ namespace Api.Web.Extensions
             return request.CreateFailureResponseFor(result.Messages, GetFailureStatusCode(result));
         }
 
+        public static HttpResponseMessage CreatePostResponseFor(this HttpRequestMessage request, Result result)
+        {
+            return request.CreateDefaultResponseFor(result);
+        }
+
+        public static HttpResponseMessage CreatePostResponseFor<T>(this HttpRequestMessage request, Result<T> result)
+        {
+            return request.CreateDefaultResponseFor(result, result.Value);
+        }
+
         public static HttpResponseMessage CreatePutResponseFor(this HttpRequestMessage request, Result result)
         {
             return request.CreateDefaultResponseFor(result);

@@ -7,7 +7,7 @@
     public enum MessageCodes
     {
         ValidationError = -1,
-        Unauthorized = 401,
+        Unauthorized = -401,
         NotFound = -404,
         UnexpectedResponseCode = -501,
         UnexpectedApiRequestError = -502,

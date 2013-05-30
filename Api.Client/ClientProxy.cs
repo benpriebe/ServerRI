@@ -236,6 +236,46 @@ namespace Api.Client
             return Put(id.ToString(), requestData);
         }
 
+        public Task<Result<TResult>> Put<TRequestData, TResult>(string relativeUri, TRequestData requestData)
+        {
+            Action<HttpRequestMessage> requestHandler = request => request.Content = new ObjectContent<TRequestData>(requestData, JsonFormatter);
+            Func<HttpResponseMessage, Result<TResult>> responseHandler = response =>
+            {
+
+                switch (response.StatusCode)
+                {
+                    case HttpStatusCode.NoContent:
+                        {
+                            return Result<TResult>.CreateEmpty();
+                        }
+                    case HttpStatusCode.OK:
+                        {
+                            var result = response.Content.ReadAsAsync<TResult>().Result;
+                            return Result<TResult>.Create(result);
+                        }
+                    case HttpStatusCode.NotFound:
+                    case HttpStatusCode.BadRequest:
+                        {
+                            var result = response.Content.ReadAsAsync<List<Message>>().Result;
+                            return Result<TResult>.Create(result);
+                        }
+                    default:
+                        {
+                            return Result<TResult>.Create(GetUnexpectedResponseStatusCodeMessage(response));
+                        }
+                }
+            };
+
+            Func<Message, Result<TResult>> errorHandler = Result<TResult>.Create;
+
+            return Request(relativeUri, HttpMethod.Post, responseHandler, errorHandler, requestHandler);
+        }
+
+        public Task<Result<TResult>> Put<TRequestData, TResult>(object id, TRequestData requestData)
+        {
+            return Put<TRequestData, TResult>(id.ToString(), requestData);
+        }
+
         public Task<Result> Delete(string relativeUri)
         {
             Func<HttpResponseMessage, Result> responseHandler = response =>
