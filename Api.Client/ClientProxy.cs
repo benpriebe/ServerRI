@@ -187,6 +187,7 @@ namespace Api.Client
                     }
                     case HttpStatusCode.NotFound:
                     case HttpStatusCode.BadRequest:
+                    case HttpStatusCode.Unauthorized:
                     {
                         var result = response.Content.ReadAsAsync<List<Message>>().Result;
                         return Result<Tuple<Uri, TResult>>.Create(result);
