@@ -56,7 +56,7 @@ namespace Api.Client
             get { return _baseApiUri; }
             private set
             {
-                _baseApiUri = value; 
+                _baseApiUri = value;
                 if (!value.EndsWith("/"))
                     _baseApiUri += "/";
             }
@@ -66,7 +66,7 @@ namespace Api.Client
         {
             get { return _jsonFormatter.Value; }
         }
-        
+
         public Task<Result<T>> Get<T>(string relativeUri, IEnumerable<MediaTypeFormatter> formatters = null)
         {
             Func<HttpResponseMessage, Result<T>> responseHandler = response =>
@@ -78,16 +78,24 @@ namespace Api.Client
                             var result = response.Content.ReadAsAsync<T>().Result;
                             return Result<T>.Create(result);
                         }
+                    case HttpStatusCode.Unauthorized:
                     case HttpStatusCode.NotFound:
                     case HttpStatusCode.BadRequest:
                         {
-                            var result = response.Content.ReadAsAsync<List<Message>>(formatters ?? CreateDefaultFormatters()).Result;
-                            return Result<T>.Create(result);
+                            try
+                            {
+                                var result = response.Content.ReadAsAsync<List<Message>>(formatters ?? CreateDefaultFormatters()).Result;
+                                return Result<T>.Create(result);
+                            }
+                            catch
+                            {
+                                return Result<T>.Create(GetUnexpectedResponseStatusCodeMessage(response));
+                            }
                         }
                     default:
-                    {
-                        return Result<T>.Create(GetUnexpectedResponseStatusCodeMessage(response));
-                    }
+                        {
+                            return Result<T>.Create(GetUnexpectedResponseStatusCodeMessage(response));
+                        }
                 }
             };
             Func<Message, Result<T>> errorHandler = Result<T>.Create;
@@ -113,7 +121,7 @@ namespace Api.Client
         {
             return PostWithUri(String.Empty, requestData);
         }
-        
+
         public Task<Result<Uri>> PostWithUri<TRequestData>(string relativeUri, TRequestData requestData)
         {
             var returnVal = Post<TRequestData, object>(relativeUri, requestData)
@@ -146,7 +154,7 @@ namespace Api.Client
                     {
                         return Result<TResult>.Create(result.Messages);
                     }
-                    return Result<TResult>.Create(result.Value.Item2); 
+                    return Result<TResult>.Create(result.Value.Item2);
 
                 }, TaskContinuationOptions.ExecuteSynchronously);
 
@@ -167,40 +175,47 @@ namespace Api.Client
                 switch (response.StatusCode)
                 {
                     case HttpStatusCode.NoContent:
-                    {
-                        return Result<Tuple<Uri, TResult>>.CreateEmpty();
-                    }
+                        {
+                            return Result<Tuple<Uri, TResult>>.CreateEmpty();
+                        }
                     case HttpStatusCode.OK:
-                    {
-                        var result = response.Content.ReadAsAsync<TResult>().Result;
-                        return Result<Tuple<Uri, TResult>>.Create(Tuple.Create<Uri, TResult>(null, result));
-                    }
-                    case HttpStatusCode.Created:
-                    {
-                        var locationUri = response.Headers.Location;
-                        if (response.Content.Headers.ContentLength.HasValue && response.Content.Headers.ContentLength.Value > 0)
                         {
                             var result = response.Content.ReadAsAsync<TResult>().Result;
-                            return Result<Tuple<Uri, TResult>>.Create(Tuple.Create(locationUri, result));
+                            return Result<Tuple<Uri, TResult>>.Create(Tuple.Create<Uri, TResult>(null, result));
                         }
-                        return Result<Tuple<Uri, TResult>>.Create(Tuple.Create(locationUri, default(TResult)));
-                    }
+                    case HttpStatusCode.Created:
+                        {
+                            var locationUri = response.Headers.Location;
+                            if (response.Content.Headers.ContentLength.HasValue && response.Content.Headers.ContentLength.Value > 0)
+                            {
+                                var result = response.Content.ReadAsAsync<TResult>().Result;
+                                return Result<Tuple<Uri, TResult>>.Create(Tuple.Create(locationUri, result));
+                            }
+                            return Result<Tuple<Uri, TResult>>.Create(Tuple.Create(locationUri, default(TResult)));
+                        }
                     case HttpStatusCode.NotFound:
                     case HttpStatusCode.BadRequest:
                     case HttpStatusCode.Unauthorized:
-                    {
-                        var result = response.Content.ReadAsAsync<List<Message>>().Result;
-                        return Result<Tuple<Uri, TResult>>.Create(result);
-                    }
+                        {
+                            try
+                            {
+                                var result = response.Content.ReadAsAsync<List<Message>>().Result;
+                                return Result<Tuple<Uri, TResult>>.Create(result);
+                            }
+                            catch
+                            {
+                                return Result<Tuple<Uri, TResult>>.Create(GetUnexpectedResponseStatusCodeMessage(response));
+                            }
+                        }
                     default:
-                    {
-                        return Result<Tuple<Uri, TResult>>.Create(GetUnexpectedResponseStatusCodeMessage(response));
-                    }
+                        {
+                            return Result<Tuple<Uri, TResult>>.Create(GetUnexpectedResponseStatusCodeMessage(response));
+                        }
                 }
             };
-            
+
             Func<Message, Result<Tuple<Uri, TResult>>> errorHandler = Result<Tuple<Uri, TResult>>.Create;
-            
+
             return Request(relativeUri, HttpMethod.Post, responseHandler, errorHandler, requestHandler);
         }
 
@@ -209,24 +224,32 @@ namespace Api.Client
             Action<HttpRequestMessage> requestHandler = request => request.Content = new ObjectContent<TRequestData>(requestData, JsonFormatter);
             Func<HttpResponseMessage, Result> responseHandler = response =>
             {
-                 switch (response.StatusCode)
+                switch (response.StatusCode)
+                {
+                    case HttpStatusCode.NoContent:
+                    case HttpStatusCode.OK:
+                        {
+                            return Result.CreateEmpty();
+                        }
+                    case HttpStatusCode.Unauthorized:
+                    case HttpStatusCode.NotFound:
+                    case HttpStatusCode.BadRequest:
+                        {
+                            try
                             {
-                                case HttpStatusCode.NoContent:
-                                case HttpStatusCode.OK:
-                                    {
-                                        return Result.CreateEmpty();
-                                    }
-                                 case HttpStatusCode.NotFound:           
-                                 case HttpStatusCode.BadRequest:
-                                    {
-                                        var result = response.Content.ReadAsAsync<List<Message>>().Result;
-                                        return Result.Create(result);
-                                    }
-                                default:
-                                    {
-                                        return Result.Create(GetUnexpectedResponseStatusCodeMessage(response));
-                                    }
+                                var result = response.Content.ReadAsAsync<List<Message>>().Result;
+                                return Result.Create(result);
                             }
+                            catch // if an unexpected 404,400 comes back from the asp.net fwk
+                            {
+                                return Result.Create(GetUnexpectedResponseStatusCodeMessage(response));
+                            }
+                        }
+                    default:
+                        {
+                            return Result.Create(GetUnexpectedResponseStatusCodeMessage(response));
+                        }
+                }
             };
             Func<Message, Result> errorHandler = Result.Create;
             return Request(relativeUri, HttpMethod.Put, responseHandler, errorHandler, requestHandler);
@@ -254,11 +277,19 @@ namespace Api.Client
                             var result = response.Content.ReadAsAsync<TResult>().Result;
                             return Result<TResult>.Create(result);
                         }
+                    case HttpStatusCode.Unauthorized:
                     case HttpStatusCode.NotFound:
                     case HttpStatusCode.BadRequest:
                         {
-                            var result = response.Content.ReadAsAsync<List<Message>>().Result;
-                            return Result<TResult>.Create(result);
+                            try
+                            {
+                                var result = response.Content.ReadAsAsync<List<Message>>().Result;
+                                return Result<TResult>.Create(result);
+                            }
+                            catch // if an unexpected 404,400 comes back from the asp.net fwk
+                            {
+                                return Result<TResult>.Create(GetUnexpectedResponseStatusCodeMessage(response));
+                            }
                         }
                     default:
                         {
@@ -288,11 +319,19 @@ namespace Api.Client
                         {
                             return Result.CreateEmpty();
                         }
+                    case HttpStatusCode.Unauthorized:
                     case HttpStatusCode.NotFound:
                     case HttpStatusCode.BadRequest:
                         {
-                            var result = response.Content.ReadAsAsync<List<Message>>().Result;
-                            return Result.Create(result);
+                            try
+                            {
+                                var result = response.Content.ReadAsAsync<List<Message>>().Result;
+                                return Result.Create(result);
+                            }
+                            catch
+                            {
+                                return Result.Create(GetUnexpectedResponseStatusCodeMessage(response));
+                            }
                         }
                     default:
                         {
@@ -344,12 +383,12 @@ namespace Api.Client
             }
 
         }
-        
-        #region Helper Methods/Classes 
+
+        #region Helper Methods/Classes
 
         protected virtual IEnumerable<MediaTypeFormatter> CreateDefaultFormatters()
         {
-            return new []
+            return new[]
             {
                 JsonFormatter,
                 new XmlMediaTypeFormatter(),
@@ -359,10 +398,10 @@ namespace Api.Client
 
         private static Message GetUnexpectedResponseStatusCodeMessage(HttpResponseMessage response)
         {
-            var message = new Message(MessageLevel.Error, (int)MessageCodes.UnexpectedResponseCode, String.Format("Unexpected response accessing -> {0} {1} - {2}: ", response.RequestMessage.Method.Method, response.RequestMessage.RequestUri.AbsoluteUri, response.StatusCode), string.Empty);
+            var error = response.Content.ReadAsAsync<object>().Result;
+            var message = new Message(MessageLevel.Error, (int)MessageCodes.UnexpectedResponseCode, String.Format("Unexpected response accessing -> {0} {1} - {2} :\r\n {3} ", response.RequestMessage.Method.Method, response.RequestMessage.RequestUri.AbsoluteUri, response.StatusCode, error));
             return message;
         }
-
 
         public class DecompressedContent : HttpContent
         {
@@ -449,4 +488,5 @@ namespace Api.Client
 
         #endregion Helper Methods/Classes
     }
+
 }
